@@ -5,7 +5,7 @@
 | 1. Foundation | ✅ done | typecheck ✓ · lint ✓ · 40 unit tests ✓ (includes the PGlite SQL/RLS suite) · build ✓ · `/`, `/portal`, `/login`, `/setup` render |
 | 2. Library & Search | ✅ done | typecheck ✓ · lint ✓ · 43 unit tests ✓ · build ✓ · API end-to-end test: PDF upload → job → 3 chunks → searchable |
 | 3. Studio & Trust | ✅ done | typecheck ✓ · lint ✓ · 46 unit tests ✓ · build ✓ · API flow: generate → the wrong number "8" is flagged → edit → green · Hindi and internal-source gating verified · scripted browser run of the Studio |
-| 4. WOW & Stretch | ⏳ | |
+| 4. WOW & Stretch | ✅ done | typecheck ✓ · lint ✓ · 47 unit tests ✓ · build ✓ · all Phase 4 routes return 200 · Ask, pack builder and access checks tested through the API |
 | 5. Polish | ⏳ | |
 
 ## Phase 1: Foundation
@@ -39,3 +39,16 @@
 - Review Queue: status tabs, the live badge, approve, reject, publish and return, comments, a guard against approving your own work, blocked state, and an audit entry for every transition. The same rules are enforced in Postgres (RLS and the approval trigger).
 - `/stories` and `/stories/[slug]` with a provenance badge ("Source-cited · Reviewed by … · date") and a "How this was made" drawer (sources, prompt version, model).
 - `/api/feed.xml` (RSS 2.0) and `/api/feed.json` (JSON Feed 1.1) of approved stories only.
+
+## Phase 4: WOW & Stretch
+- 3-level explainers, Data Quick-Look and glossary tooltips (built in Phase 2, see above).
+- Polar Calendar (`/studio/calendar`): calendar view, seeded occasions and the 46-ISEA milestone, suggested published items per occasion, content-gap flags, "Draft a post", and "Build this week's pack" (`/api/calendar/suggest` drafts Instagram and X posts into the Review Queue).
+- Embargo release: `/api/embargo/release` for reviewers or cron, plus a lazy check when reviewers open the Studio. It clears the embargo, audits it and queues embeddings.
+- Ask NCPOR (`/ask`, `/api/ask`): only published, public, non-embargoed chunks plus the glossary, filtered even for staff. Answers are cited; low confidence returns "not in the archive". Offline mode returns verbatim source sentences.
+- Studio Overview (`/studio`): KPIs, content-gap insights with shortcuts, upcoming occasions, recent uploads, live activity.
+- Analytics (`/studio/analytics`): 14-day traffic chart, top and no-result searches, items by status, most-approved formats, most-viewed items.
+- Live Expedition Mode (`/studio/live`, `/api/live`): a phone form for photo, day number and note. It creates an in-review photo item and a cited "Day N" draft. AI polishing runs only for public updates.
+- Learn (`/learn`, `/learn/glossary`): primer, bilingual glossary with search and A–Z index, deterministic cited cloze quizzes (member attempts are saved), and a printable teacher-pack PDF.
+- Map (`/map`): Leaflet with OSM tiles fitted to the stations, custom animated markers, popups, and an accessible list underneath.
+- Admin: Team & Roles (allow-list, invite, change role, remove; you can't demote yourself), Settings (branding, languages, channel templates, embargo defaults; migration `0004_settings.sql`), Audit Log.
+- About and Accessibility statement pages.

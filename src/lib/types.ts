@@ -34,6 +34,17 @@ export interface Organization {
   logo_url: string | null;
 }
 
+export interface OrgSettings {
+  displayName: string;
+  tagline: string;
+  languages: { en: boolean; hi: boolean };
+  hashtags: string[];
+  xLimit: number;
+  defaultAudience: "school" | "college" | "expert" | "public";
+  defaultRelease: "public" | "internal" | "embargo";
+  defaultEmbargoDays: number;
+}
+
 export interface Profile {
   id: string;
   full_name: string | null;

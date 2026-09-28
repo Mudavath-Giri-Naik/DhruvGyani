@@ -2,7 +2,9 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { buildCalendar } from "@/lib/calendar";
+import { DEFAULT_SETTINGS } from "@/lib/settings";
 import type {
+  OrgSettings,
   AuditEntry,
   CalendarEntry,
   Chunk,
@@ -52,6 +54,13 @@ export class SupabaseRepo implements Repo {
 
   async org(): Promise<Organization> {
     return this.must(await this.db.from("organizations").select("*").eq("slug", "ncpor").single());
+  }
+  async settings(): Promise<OrgSettings> {
+    const org = await this.org();
+    return { ...DEFAULT_SETTINGS, ...((org as Organization & { settings?: Partial<OrgSettings> }).settings ?? {}) };
+  }
+  async saveSettings(s: OrgSettings) {
+    this.must(await this.db.from("organizations").update({ settings: s }).eq("slug", "ncpor"));
   }
   async stations(): Promise<Station[]> {
     return this.must(await this.db.from("stations").select("*").order("name"));

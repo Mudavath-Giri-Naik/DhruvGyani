@@ -17,6 +17,7 @@ import type {
   Job,
   Lang,
   Organization,
+  OrgSettings,
   Profile,
   ReviewComment,
   SearchFilters,
@@ -70,6 +71,8 @@ export interface Repo {
   viewer: Viewer;
 
   org(): Promise<Organization>;
+  settings(): Promise<OrgSettings>;
+  saveSettings(s: OrgSettings): Promise<void>;
   stations(): Promise<Station[]>;
   expeditions(): Promise<Expedition[]>;
   expeditionByCode(code: string): Promise<Expedition | null>;

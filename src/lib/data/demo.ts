@@ -25,7 +25,9 @@ import {
 import { glossarySeed } from "@/lib/seed/glossary";
 import { seedExplainers, seedGenerations } from "@/lib/seed/packs";
 import { verifyClaimsOffline } from "@/lib/trust/claims";
+import { DEFAULT_SETTINGS } from "@/lib/settings";
 import type {
+  OrgSettings,
   AuditEntry,
   CalendarEntry,
   Chunk,
@@ -62,6 +64,7 @@ interface State {
   favourites: Map<string, Set<string>>;
   quiz: { user_id: string; item_id: string; score: number; at: string }[];
   blobs: Map<string, { data: ArrayBuffer; mime: string }>;
+  settings: OrgSettings;
   seq: number;
 }
 
@@ -134,13 +137,27 @@ function initState(): State {
     favourites: new Map(),
     quiz: [],
     blobs: new Map(),
+    settings: { ...DEFAULT_SETTINGS },
     seq: 1000,
   };
 }
 
-const g = globalThis as unknown as { __dhruvDemo?: State };
+/** Bump when State gains a field, so hot-reloaded dev state gets backfilled. */
+const STATE_VERSION = 2;
+const g = globalThis as unknown as { __dhruvDemo?: State; __dhruvDemoV?: number };
 function state(): State {
-  if (!g.__dhruvDemo) g.__dhruvDemo = initState();
+  if (!g.__dhruvDemo) {
+    g.__dhruvDemo = initState();
+    g.__dhruvDemoV = STATE_VERSION;
+  }
+  // Dev hot reload keeps old state: backfill fields added since it was created.
+  if (g.__dhruvDemoV !== STATE_VERSION) {
+    const fresh = initState();
+    for (const k of Object.keys(fresh) as (keyof State)[]) {
+      if (g.__dhruvDemo[k] === undefined) (g.__dhruvDemo as unknown as Record<string, unknown>)[k] = fresh[k];
+    }
+    g.__dhruvDemoV = STATE_VERSION;
+  }
   return g.__dhruvDemo;
 }
 
@@ -187,6 +204,13 @@ export class DemoRepo implements Repo {
   }
   async stations() {
     return seedStations;
+  }
+  async settings() {
+    return this.s.settings;
+  }
+  async saveSettings(s: OrgSettings) {
+    if (this.viewer.role !== "admin") throw new Error("Admin only");
+    this.s.settings = s;
   }
   async expeditions() {
     return seedExpeditions;

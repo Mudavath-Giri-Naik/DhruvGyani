@@ -223,3 +223,16 @@ describe("claims skip questions", () => {
     expect(c.map((x) => x.text)).toEqual(["The team dug 12 pits [c3]."]);
   });
 });
+
+describe("quiz builder", () => {
+  it("makes cited cloze questions whose answer is in the source", async () => {
+    const { buildQuiz } = await import("@/lib/quiz");
+    const qs = buildQuiz([{ text: "SAMPLE - not real data. The team serviced 6 automatic weather stations. They dug 12 snow pits in 2026.", cite: "c1" }]);
+    expect(qs).toHaveLength(2);
+    expect(qs[0].q).toBe("The team serviced ____ automatic weather stations.");
+    expect(qs[0].options[qs[0].answer]).toBe("6");
+    expect(new Set(qs[0].options).size).toBe(4);
+    expect(qs[1].options[qs[1].answer]).toBe("12");
+    expect(qs.every((q) => q.cite === "c1")).toBe(true);
+  });
+});
