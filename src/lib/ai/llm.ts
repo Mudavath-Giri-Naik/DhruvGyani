@@ -28,6 +28,8 @@ export interface LlmProvider {
   name: string;
   model: string;
   generate(prompt: string, opts?: GenerateOptions): Promise<string>;
+  /** Multimodal: prompt plus one inline image (alt-text suggestions). */
+  describeImage(prompt: string, base64: string, mime: string, opts?: GenerateOptions): Promise<string>;
   embed(texts: string[]): Promise<number[][]>;
 }
 
@@ -113,6 +115,21 @@ class GeminiProvider implements LlmProvider {
         const text = res.text;
         if (!text) throw Object.assign(new Error("Empty model response"), { status: 500 });
         return text;
+      }, opts.timeoutMs ?? 45000),
+    );
+  }
+
+  async describeImage(prompt: string, base64: string, mime: string, opts: GenerateOptions = {}) {
+    const ai = await this.client();
+    return withSlot(() =>
+      withRetry(async (abortSignal) => {
+        const res = await ai.models.generateContent({
+          model: this.model,
+          contents: [{ role: "user", parts: [{ inlineData: { data: base64, mimeType: mime } }, { text: prompt }] }],
+          config: { systemInstruction: opts.system, temperature: 0.2, responseMimeType: opts.json ? "application/json" : undefined, abortSignal },
+        });
+        if (!res.text) throw Object.assign(new Error("Empty model response"), { status: 500 });
+        return res.text;
       }, opts.timeoutMs ?? 45000),
     );
   }

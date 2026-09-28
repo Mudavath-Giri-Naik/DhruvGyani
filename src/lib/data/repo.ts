@@ -25,6 +25,8 @@ import type {
   Viewer,
 } from "@/lib/types";
 
+export type StorageBucket = "public-media" | "private-uploads" | "datasets";
+
 export interface ItemQuery {
   type?: ItemType;
   expeditionId?: string;
@@ -83,6 +85,14 @@ export interface Repo {
   replaceChunks(itemId: string, chunks: NewChunk[]): Promise<void>;
   itemFiles(itemId: string): Promise<ItemFile[]>;
   addItemFile(file: Omit<ItemFile, "id">): Promise<void>;
+  /** Store bytes; returns a URL the browser can use (public URL or /api/files proxy). */
+  putFile(bucket: StorageBucket, path: string, data: ArrayBuffer, mime: string): Promise<string>;
+  getFile(bucket: StorageBucket, path: string): Promise<ArrayBuffer | null>;
+  /** Item that owns a stored file (null if none or not visible to the viewer). */
+  fileItemId(bucket: StorageBucket, path: string): Promise<string | null>;
+  /** All photo perceptual hashes (duplicate detection). */
+  photoHashes(): Promise<{ item_id: string; phash: string }[]>;
+  getJob(id: string): Promise<Job | null>;
 
   search(query: string, filters: SearchFilters, embedding?: number[] | null): Promise<SearchResult[]>;
   /** Semantic/keyword retrieval restricted to given items (Studio, Ask). */

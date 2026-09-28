@@ -23,7 +23,7 @@ import {
   stations as seedStations,
 } from "@/lib/seed/data";
 import { glossarySeed } from "@/lib/seed/glossary";
-import { seedGenerations } from "@/lib/seed/packs";
+import { seedExplainers, seedGenerations } from "@/lib/seed/packs";
 import { verifyClaimsOffline } from "@/lib/trust/claims";
 import type {
   AuditEntry,
@@ -40,7 +40,7 @@ import type {
   ReviewComment,
   Viewer,
 } from "@/lib/types";
-import type { ItemQuery, NewChunk, NewItem, Repo, SearchStats, StaffEntry } from "./repo";
+import type { ItemQuery, NewChunk, NewItem, Repo, SearchStats, StaffEntry, StorageBucket } from "./repo";
 
 
 interface State {
@@ -61,6 +61,7 @@ interface State {
   staff: { email: string; role: StaffEntry["role"] }[];
   favourites: Map<string, Set<string>>;
   quiz: { user_id: string; item_id: string; score: number; at: string }[];
+  blobs: Map<string, { data: ArrayBuffer; mime: string }>;
   seq: number;
 }
 
@@ -118,7 +119,7 @@ function initState(): State {
     files: [],
     profiles,
     csv,
-    explainers: [],
+    explainers: seedExplainers.map((e) => ({ ...e })),
     generations,
     claims,
     comments: [
@@ -132,6 +133,7 @@ function initState(): State {
     staff: demoProfiles.filter((p) => p.role !== "member").map((p) => ({ email: p.email!, role: p.role })),
     favourites: new Map(),
     quiz: [],
+    blobs: new Map(),
     seq: 1000,
   };
 }
@@ -246,6 +248,27 @@ export class DemoRepo implements Repo {
   }
   async addItemFile(file: Omit<ItemFile, "id">) {
     this.s.files.push({ ...file, id: uuid() });
+  }
+  async putFile(bucket: StorageBucket, path: string, data: ArrayBuffer, mime: string) {
+    this.requireStaff();
+    this.s.blobs.set(`${bucket}/${path}`, { data, mime });
+    return `/api/files?bucket=${bucket}&path=${encodeURIComponent(path)}`;
+  }
+  async getFile(bucket: StorageBucket, path: string) {
+    return this.s.blobs.get(`${bucket}/${path}`)?.data ?? null;
+  }
+  async fileItemId(bucket: StorageBucket, path: string) {
+    const f = this.s.files.find((x) => x.storage_bucket === bucket && x.storage_path === path);
+    return f && (await this.getItem(f.item_id)) ? f.item_id : null;
+  }
+  blobMime(bucket: StorageBucket, path: string) {
+    return this.s.blobs.get(`${bucket}/${path}`)?.mime ?? "application/octet-stream";
+  }
+  async photoHashes() {
+    return this.s.files.filter((f) => f.phash).map((f) => ({ item_id: f.item_id, phash: f.phash! }));
+  }
+  async getJob(id: string) {
+    return this.s.jobs.find((j) => j.id === id) ?? null;
   }
 
   async search(query: string, filters: import("@/lib/types").SearchFilters) {

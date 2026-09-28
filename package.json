@@ -18,7 +18,8 @@
     "seed:admin": "tsx scripts/seed-admin.ts",
     "sql:bundle": "tsx scripts/bundle-sql.ts",
     "make:sample-pdfs": "tsx scripts/make-sample-pdfs.ts",
-    "pregenerate": "tsx scripts/pregenerate.ts"
+    "pregenerate": "tsx scripts/pregenerate.ts",
+    "db:build": "tsx scripts/make-sample-pdfs.ts && tsx scripts/gen-seed-sql.ts && tsx scripts/bundle-sql.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",
@@ -29,6 +30,7 @@
     "cmdk": "^1.1.1",
     "cn": "^0.4.0",
     "date-fns": "^4.4.0",
+    "exifr": "^7.1.3",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.48.0",
     "motion": "^13.4.4",

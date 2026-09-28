@@ -23,7 +23,7 @@ import type {
   Station,
   Viewer,
 } from "@/lib/types";
-import type { ItemQuery, NewChunk, NewItem, Repo, SearchStats, StaffEntry } from "./repo";
+import type { ItemQuery, NewChunk, NewItem, Repo, SearchStats, StaffEntry, StorageBucket } from "./repo";
 
 /** Drop UI-only fields that are not table columns. */
 function stripDerived<T extends Partial<Generation>>(g: T) {
@@ -123,6 +123,33 @@ export class SupabaseRepo implements Repo {
   }
   async addItemFile(file: Omit<ItemFile, "id">) {
     this.must(await this.db.from("item_files").insert(file));
+  }
+  async putFile(bucket: StorageBucket, path: string, data: ArrayBuffer, mime: string) {
+    const { error } = await this.db.storage.from(bucket).upload(path, data, { contentType: mime, upsert: false });
+    if (error) throw new Error(error.message);
+    if (bucket === "public-media") return this.db.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+    return `/api/files?bucket=${bucket}&path=${encodeURIComponent(path)}`;
+  }
+  async getFile(bucket: StorageBucket, path: string) {
+    const { data } = await this.db.storage.from(bucket).download(path);
+    return data ? await data.arrayBuffer() : null;
+  }
+  async fileItemId(bucket: StorageBucket, path: string) {
+    const row = this.must(
+      await this.db.from("item_files").select("item_id").eq("storage_bucket", bucket).eq("storage_path", path).maybeSingle(),
+    ) as { item_id: string } | null;
+    return row && (await this.getItem(row.item_id)) ? row.item_id : null;
+  }
+  async signedUrl(bucket: StorageBucket, path: string) {
+    const { data } = await this.db.storage.from(bucket).createSignedUrl(path, 120);
+    return data?.signedUrl ?? null;
+  }
+  async photoHashes() {
+    const rows = (this.must(await this.db.from("item_files").select("item_id,phash").not("phash", "is", null)) ?? []) as { item_id: string; phash: string }[];
+    return rows;
+  }
+  async getJob(id: string) {
+    return this.must(await this.db.from("jobs").select("*").eq("id", id).maybeSingle()) as Job | null;
   }
 
   async search(query: string, filters: SearchFilters, embedding?: number[] | null) {

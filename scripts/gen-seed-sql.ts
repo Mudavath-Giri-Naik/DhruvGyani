@@ -10,7 +10,7 @@ import { profileCsv } from "../src/lib/datasets/profile";
 import { isPubliclyVisible } from "../src/lib/policy";
 import { chunkId, datasetCsv, expeditions, items, org, sampleDocs, stations } from "../src/lib/seed/data";
 import { glossarySeed } from "../src/lib/seed/glossary";
-import { seedGenerations } from "../src/lib/seed/packs";
+import { seedExplainers, seedGenerations } from "../src/lib/seed/packs";
 import { verifyClaimsOffline } from "../src/lib/trust/claims";
 import type { Chunk } from "../src/lib/types";
 
@@ -95,6 +95,12 @@ for (const g of seedGenerations) {
       `insert into public.generation_claims (generation_id, claim_text, chunk_id, verdict, note, number_misses) values (${[c.generation_id, c.claim_text, c.chunk_id, c.verdict, c.note].map(q).join(", ")}, ${arr(c.number_misses)});`,
     );
   }
+}
+
+for (const e of seedExplainers) {
+  out.push(
+    `insert into public.explainers (item_id, level, language, text, citations) values (${[e.item_id, e.level, e.language, e.text].map(q).join(", ")}, ${json(e.citations)}) on conflict (item_id, level, language) do nothing;`,
+  );
 }
 
 out.push("commit;", "");

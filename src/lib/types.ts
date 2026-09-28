@@ -286,4 +286,5 @@ export interface ItemFile {
   mime: string;
   size: number;
   checksum: string | null;
+  phash?: string | null;
 }

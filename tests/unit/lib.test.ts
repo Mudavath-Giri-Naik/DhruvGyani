@@ -167,3 +167,34 @@ describe("trust claims", () => {
     expect(approvalBlockers([{ verdict: "unsupported", number_misses: [] }]).blocked).toBe(true);
   });
 });
+
+describe("heuristic autofill", () => {
+  it("skips page headers and finds code, year and keywords", async () => {
+    const { heuristicAutofill } = await import("@/lib/ingest/autofill");
+    const text =
+      "SAMPLE - not real data Page 1 of 3 SAMPLE 45-ISEA Summer Field Log (Sample) 45-ISEA Summer Field Log. The team worked from Maitri between 8 January 2026 and 21 January 2026. Snow pits and snow density were recorded.";
+    const s = heuristicAutofill({ filename: "field_log.pdf", text, knownCodes: ["45-ISEA", "46-ISEA"] });
+    expect(s.title).not.toMatch(/^Page/);
+    expect(s.title).toContain("Field Log");
+    expect(s.expedition_code).toBe("45-ISEA");
+    expect(s.year).toBe(2026);
+    expect(s.keywords).toContain("snow");
+  });
+  it("falls back to a humanised filename and detects ordinal expedition names", async () => {
+    const { heuristicAutofill, detectExpeditionCode } = await import("@/lib/ingest/autofill");
+    expect(heuristicAutofill({ filename: "glacier_mass-balance_notes.pdf" }).title).toBe("Glacier mass balance notes");
+    expect(detectExpeditionCode("Report of the 46th Indian Scientific Expedition to Antarctica")).toBe("46-ISEA");
+  });
+});
+
+describe("PDF ingestion", () => {
+  it("extracts sample PDF text per page and chunks it with page numbers", async () => {
+    const { extractPdfPages } = await import("@/lib/ingest/process");
+    const buf = readFileSync(join(process.cwd(), "public/samples/45-isea-field-log-sample.pdf"));
+    const pages = await extractPdfPages(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
+    expect(pages).toHaveLength(3);
+    expect(pages[1].text).toContain("6 automatic weather stations");
+    const chunks = chunkPages(pages);
+    expect(chunks.map((c) => c.page_no)).toEqual([1, 2, 3]);
+  });
+});

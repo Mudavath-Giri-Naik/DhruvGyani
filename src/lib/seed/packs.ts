@@ -5,7 +5,7 @@
  * 6) so the Trust Panel demo can show the numbers check blocking approval.
  * Hindi text: machine-assisted draft — needs review by a Hindi speaker.
  */
-import type { Citation, Generation } from "@/lib/types";
+import type { Citation, Explainer, Generation } from "@/lib/types";
 import { PROMPT_VERSION } from "@/lib/constants";
 import { ITEM, ORG_ID, chunkId, items, sampleDocs, sid } from "./data";
 
@@ -147,3 +147,35 @@ export const seedGenerations: Generation[] = packs.map((p) => ({
   updated_at: p.reviewed_at ?? p.created_at,
   is_demo: true,
 }));
+
+/** Pre-generated explainers for the flagship sample report (demo without an LLM key). */
+export const seedExplainers: Explainer[] = [
+  {
+    item_id: ITEM.r45,
+    level: "school",
+    language: "en",
+    text: "This is a practice (sample) diary from a science team in Antarctica [c1]. The team looked after 6 weather stations — machines that measure things like temperature and wind by themselves [c2]. It was cold: the air was between -12.4 °C and 2.1 °C [c2]. They also dug 12 holes in the snow, called snow pits, to see the layers of snow [c3].",
+    citations: r45,
+  },
+  {
+    item_id: ITEM.r45,
+    level: "college",
+    language: "en",
+    text: "This sample field log documents a summer campaign run from Maitri between 8 and 21 January 2026 [c1]. The team serviced 6 automatic weather stations along a coastal traverse, replacing batteries at 4 of them and recalibrating one wind sensor [c2]. Air temperature during servicing ranged from -12.4 °C to 2.1 °C [c2]. They also excavated 12 snow pits and logged density every 10 cm, and noted fast-ice break-up near the landing site in the final week [c3].",
+    citations: r45,
+  },
+  {
+    item_id: ITEM.r45,
+    level: "expert",
+    language: "en",
+    text: "Sample record of a coastal AWS maintenance traverse (Maitri, 8–21 January 2026) [c1]: 6 automatic weather stations serviced, battery replacement at 4 sites and one anemometer recalibration [c2]. Ambient air temperature during servicing spanned -12.4 °C to 2.1 °C [c2]. Snow stratigraphy: 12 pits with density sampled at 10 cm vertical resolution; fast-ice break-up observed at the landing site during the final week [c3]. Note: fictional sample data for demonstration only.",
+    citations: r45,
+  },
+  {
+    item_id: ITEM.r45,
+    level: "school",
+    language: "hi",
+    text: "यह अंटार्कटिका में एक विज्ञान टीम की अभ्यास (नमूना) डायरी है [c1]। टीम ने 6 मौसम केंद्रों की देखभाल की — ये मशीनें अपने आप तापमान और हवा जैसी चीज़ें मापती हैं [c2]। वहाँ ठंड थी: हवा का तापमान -12.4 °C से 2.1 °C के बीच था [c2]। टीम ने बर्फ की परतें देखने के लिए 12 स्नो पिट भी खोदे [c3]।",
+    citations: r45,
+  },
+];

@@ -28,6 +28,11 @@ Open choices made while building DhruvGyani, and why. Newest decisions are added
 | D18 | SQL is **tested in-process with PGlite and pgvector** (`tests/unit/sql.test.ts`), using small `auth` and `storage` stubs. | This verifies migrations, the seed, RLS, embargo, Hindi FTS, hybrid search and approval guards without a cloud project. |
 | D19 | `ADMIN_BOOTSTRAP_EMAILS` are honoured in three places: `npm run seed:admin`, the OAuth callback (upsert into `allowed_staff` using the secret key), and viewer resolution. | This way the first admin works even if they sign in before running the script. |
 
+| D40 | Uploaded files go to the **private** bucket (`private-uploads`; CSVs go to `datasets`) and are served through `/api/files`, which checks item visibility and then issues a signed URL. | A draft or embargoed file in the public bucket would be reachable by URL. This keeps storage behind the same rules as RLS. |
+| D41 | Background jobs run with Next's **`after()`** straight after the upload response, using a `jobs` table (status, attempts, retry). | This avoids request timeouts and needs no extra worker process for the demo. Retries are available from the Upload page. |
+| D42 | The **perceptual hash (dHash) is computed in the browser** with canvas. | The server then needs no native image libraries. Duplicate threshold: Hamming distance ≤ 6. |
+| D43 | `jobs.error` also stores the **success note** (for example "3 pages → 3 chunks") once a job is done. | This avoids a schema change for a display-only string. |
+
 ## AI
 
 | # | Decision | Why |
@@ -35,6 +40,7 @@ Open choices made while building DhruvGyani, and why. Newest decisions are added
 | D20 | Gemini through **`@google/genai`**, text model **`gemini-flash-latest`** and embeddings **`gemini-embedding-2`** at `outputDimensionality: 768`. | These names come from the SDK README and the Gemini embeddings docs, read on 28 Sep 2026. `gemini-embedding-2` doesn't take a `taskType`, so the task goes in the text instead. |
 | D21 | Without a key, or with `DEMO_MODE=true`, the Studio serves **pre-generated packs** and verification uses a deterministic **heuristic verifier** (lexical support plus numbers check). | This degrades gracefully, and the numbers check is always deterministic regardless of the LLM. |
 | D22 | For **cross-language claims** (Hindi draft, English source), the heuristic verdict is `weak`, not `supported`, with the note "numbers checked, wording needs a human check". | This avoids overstating what an offline check can prove. `weak` doesn't block approval, but numbers still do. |
+| D24 | Without an AI key, or for items not cleared for AI, the **explainer falls back to an extract of cited source sentences**, labelled "Offline extract". Pre-generated explainers exist for the flagship sample report (school, college and expert in EN, school in HI). | This is honest graceful degradation, and the demo still shows three levels. |
 | D23 | The number word "zero" isn't treated as a stated number. | Otherwise phrases like "below zero" produced false flags. |
 
 ## Content
