@@ -25,6 +25,8 @@ export function splitClaims(output: GenerationOutput): DraftClaim[] {
   const claims: DraftClaim[] = [];
   const add = (prefix: string, text: string, cites: string[]) => {
     splitSentences(text).forEach((s, i) => {
+      // Questions assert nothing, so there is nothing to verify.
+      if (/[?？]\s*$/.test(s.replace(/\s*\[[^\]]*\]\s*$/, ""))) return;
       const own = inlineCites(s);
       claims.push({ key: `${prefix}.${i}`, text: s, cites: own.length ? own : cites });
     });
@@ -118,4 +120,39 @@ export function approvalBlockers(claims: Pick<GenerationClaim, "verdict" | "numb
   const unsupported = claims.filter((c) => c.verdict === "unsupported").length;
   const numbers = claims.filter((c) => c.number_misses.length > 0).length;
   return { unsupported, numbers, blocked: unsupported + numbers > 0 };
+}
+
+/**
+ * Replace (or remove, when `text` is empty) the claim at `index` — in
+ * splitClaims() order — and return a new output. Paragraph-level cites are
+ * recomputed from inline markers.
+ */
+export function applyClaimEdit(output: GenerationOutput, index: number, text: string): GenerationOutput {
+  const claims = splitClaims(output);
+  const target = claims[index];
+  if (!target) return output;
+  const [prefix, a, b] = target.key.split(".");
+  const next = structuredClone(output);
+  const rewrite = (para: { text: string; cites: string[] }, sentenceIdx: number) => {
+    const parts = splitSentences(para.text);
+    if (text.trim()) parts[sentenceIdx] = text.trim();
+    else parts.splice(sentenceIdx, 1);
+    para.text = parts.join(" ");
+    const markers = [...new Set(parts.flatMap(inlineCites))];
+    if (markers.length) para.cites = markers;
+  };
+  if (next.channel === "website_article") {
+    const list = prefix === "body" ? next.body : next.key_facts;
+    const para = list[Number(a)];
+    if (para) {
+      rewrite(para, Number(b));
+      if (!para.text.trim()) list.splice(Number(a), 1);
+    }
+  } else {
+    const para = { text: next.text, cites: next.cites };
+    rewrite(para, Number(a));
+    next.text = para.text;
+    next.cites = para.cites;
+  }
+  return next;
 }

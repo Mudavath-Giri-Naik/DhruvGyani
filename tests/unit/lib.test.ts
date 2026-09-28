@@ -198,3 +198,28 @@ describe("PDF ingestion", () => {
     expect(chunks.map((c) => c.page_no)).toEqual([1, 2, 3]);
   });
 });
+
+describe("claim edits", () => {
+  it("replaces one sentence and keeps the others", async () => {
+    const { applyClaimEdit, splitClaims } = await import("@/lib/trust/claims");
+    const out = { channel: "x" as const, text: "The team serviced 8 stations [c2]. It was cold [c2].", cites: ["c2"], hashtags: [] };
+    const edited = applyClaimEdit(out, 0, "The team serviced 6 stations [c2].");
+    expect(edited.channel === "x" && edited.text).toBe("The team serviced 6 stations [c2]. It was cold [c2].");
+    const removed = applyClaimEdit(out, 1, "");
+    expect(splitClaims(removed)).toHaveLength(1);
+  });
+  it("edits article key facts by index", async () => {
+    const { applyClaimEdit } = await import("@/lib/trust/claims");
+    const art = { channel: "website_article" as const, headline: "h", standfirst: "s", body: [{ text: "A [c1].", cites: ["c1"] }], key_facts: [{ text: "B [c2]", cites: ["c2"] }] };
+    const e = applyClaimEdit(art, 1, "C [c3]");
+    expect(e.channel === "website_article" && e.key_facts[0]).toEqual({ text: "C [c3]", cites: ["c3"] });
+  });
+});
+
+describe("claims skip questions", () => {
+  it("does not treat a rhetorical question as a claim", async () => {
+    const { splitClaims } = await import("@/lib/trust/claims");
+    const c = splitClaims({ channel: "instagram", text: "What does a field day look like? The team dug 12 pits [c3].", cites: ["c3"], hashtags: [] });
+    expect(c.map((x) => x.text)).toEqual(["The team dug 12 pits [c3]."]);
+  });
+});
