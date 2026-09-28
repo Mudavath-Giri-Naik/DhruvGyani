@@ -20,11 +20,12 @@ export async function generateMetadata({ params }: PageProps<"/expeditions/[code
 
 export default async function ExpeditionStory({ params }: PageProps<"/expeditions/[code]">) {
   const { code } = await params;
-  const [t, tr, ts, tt, repo] = await Promise.all([
+  const [t, tr, ts, tt, tu, repo] = await Promise.all([
     getTranslations("expeditions"),
     getTranslations("regions"),
     getTranslations("expStatus"),
     getTranslations("types"),
+    getTranslations("ui"),
     getRepo(),
   ]);
   const exp = await repo.expeditionByCode(decodeURIComponent(code));
@@ -45,9 +46,9 @@ export default async function ExpeditionStory({ params }: PageProps<"/expedition
 
   // Timeline: expedition bounds + dated items, oldest first.
   const timeline = [
-    ...(exp.start_date ? [{ date: exp.start_date, label: "Expedition begins", type: null as string | null, href: null as string | null }] : []),
+    ...(exp.start_date ? [{ date: exp.start_date, label: tu("expeditionBegins"), type: null as string | null, href: null as string | null }] : []),
     ...items.filter((i) => i.event_date).map((i) => ({ date: i.event_date!, label: i.title, type: i.type as string | null, href: `/items/${i.id}` })),
-    ...(exp.end_date ? [{ date: exp.end_date, label: exp.status === "completed" ? "Expedition concludes" : "Planned end", type: null, href: null }] : []),
+    ...(exp.end_date ? [{ date: exp.end_date, label: exp.status === "completed" ? tu("expeditionConcludes") : tu("plannedEnd"), type: null, href: null }] : []),
   ].sort((a, b) => a.date.localeCompare(b.date));
 
   const byType = Object.fromEntries(ITEM_TYPES.map((type) => [type, items.filter((i) => i.type === type)]));
@@ -129,8 +130,8 @@ export default async function ExpeditionStory({ params }: PageProps<"/expedition
             </BlurFade>
             <ol className="relative mt-8 space-y-8 before:absolute before:top-2 before:bottom-2 before:left-[7px] before:w-0.5 before:bg-gradient-to-b before:from-primary before:via-aurora before:to-primary/10">
               {timeline.map((ev, i) => (
-                <BlurFade key={`${ev.date}-${i}`} inView delay={0.03 * i} direction="left">
-                  <li className="relative pl-10">
+                <li key={`${ev.date}-${i}`} className="relative pl-10">
+                  <BlurFade inView delay={0.03 * i} direction="left">
                     <span className="absolute top-1.5 left-0 flex size-4 items-center justify-center rounded-full bg-background ring-2 ring-primary">
                       <span className="size-1.5 rounded-full bg-primary" />
                     </span>
@@ -142,8 +143,8 @@ export default async function ExpeditionStory({ params }: PageProps<"/expedition
                     ) : (
                       <p className="mt-0.5 font-medium">{ev.label}</p>
                     )}
-                  </li>
-                </BlurFade>
+                  </BlurFade>
+                </li>
               ))}
             </ol>
           </section>
@@ -164,10 +165,10 @@ export default async function ExpeditionStory({ params }: PageProps<"/expedition
                 </h2>
                 <p className="mt-2 text-sm text-white/75">{station.description}</p>
                 <p className="mt-3 font-mono text-xs text-white/60">
-                  {station.lat.toFixed(2)}°, {station.lng.toFixed(2)}° (approx.)
+                  {station.lat.toFixed(2)}°, {station.lng.toFixed(2)}° ({tu("approx")})
                 </p>
                 <Link href="/map" className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-white underline-offset-4 hover:underline">
-                  <MapPin className="size-4" /> Open map
+                  <MapPin className="size-4" /> {tu("openMap")}
                 </Link>
               </div>
             </section>
@@ -192,7 +193,7 @@ export default async function ExpeditionStory({ params }: PageProps<"/expedition
                 </BlurFade>
               ))}
             </div>
-            <p className="mt-3 text-xs text-muted-foreground">Facts come from reviewed, source-cited stories built on this expedition&apos;s items.</p>
+            <p className="mt-3 text-xs text-muted-foreground">{tu("factsNote")}</p>
           </section>
         )}
 

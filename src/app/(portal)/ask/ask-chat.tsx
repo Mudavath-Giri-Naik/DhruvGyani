@@ -24,6 +24,7 @@ interface Msg {
 
 export function AskChat({ initial }: { initial: string }) {
   const t = useTranslations("ask");
+  const tu = useTranslations("ui");
   const locale = useLocale();
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
@@ -115,7 +116,7 @@ export function AskChat({ initial }: { initial: string }) {
                     </ol>
                     {m.mode === "offline" && (
                       <p className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <Database className="size-3" /> Offline answer: matching source sentences (no AI key)
+                        <Database className="size-3" /> {tu("offlineAnswer")}
                       </p>
                     )}
                   </div>

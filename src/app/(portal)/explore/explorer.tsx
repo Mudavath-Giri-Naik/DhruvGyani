@@ -65,6 +65,7 @@ export function Explorer({
 }) {
   const t = useTranslations("explore");
   const tt = useTranslations("types");
+  const tu = useTranslations("ui");
   const router = useRouter();
   const [q, setQ] = useState(initialQuery);
   const [debounced, setDebounced] = useState(initialQuery);
@@ -213,7 +214,7 @@ export function Explorer({
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <p aria-live="polite">{loading ? "…" : t("results", { count: shown.length })}</p>
           <Badge variant="outline" className="gap-1">
-            <Brain className="size-3" /> {mode === "hybrid" ? t("hybrid") : "Keyword search"}
+            <Brain className="size-3" /> {mode === "hybrid" ? t("hybrid") : tu("keywordSearch")}
           </Badge>
         </div>
       )}
@@ -238,7 +239,7 @@ export function Explorer({
                 <article className="group relative rounded-xl border bg-card p-4 transition-all hover:border-primary/40 hover:shadow-md">
                   <div className="flex flex-wrap items-center gap-2">
                     <TypeBadge type={r.type} />
-                    <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">relevance {(r.score * 100).toFixed(1)}</span>
+                    <span className="ml-auto text-[11px] text-muted-foreground tabular-nums">{tu("relevance")} {(r.score * 100).toFixed(1)}</span>
                   </div>
                   <h2 className="mt-2 font-semibold group-hover:text-primary">
                     <Link href={`/items/${r.id}`} className="after:absolute after:inset-0">

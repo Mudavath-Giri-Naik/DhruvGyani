@@ -18,7 +18,7 @@
     "seed:admin": "tsx scripts/seed-admin.ts",
     "sql:bundle": "tsx scripts/bundle-sql.ts",
     "make:sample-pdfs": "tsx scripts/make-sample-pdfs.ts",
-    "pregenerate": "tsx scripts/pregenerate.ts",
+    "pregenerate": "tsx --conditions=react-server scripts/pregenerate.ts",
     "db:build": "tsx scripts/make-sample-pdfs.ts && tsx scripts/gen-seed-sql.ts && tsx scripts/bundle-sql.ts"
   },
   "dependencies": {

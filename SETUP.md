@@ -66,7 +66,7 @@ Based on the [Supabase Google login guide](https://supabase.com/docs/guides/auth
 ## 5. Gemini (AI drafting, explainers, Ask NCPOR, semantic search)
 1. Go to <https://aistudio.google.com/apikey> → **Create API key**.
 2. Set `GEMINI_API_KEY` in `.env.local`. The defaults `LLM_MODEL=gemini-flash-latest` and `EMBEDDING_MODEL=gemini-embedding-2` (768 dimensions) were checked against the SDK README and Gemini docs on 28 Sep 2026. Re-check the current model names and free-tier limits at <https://ai.google.dev/gemini-api/docs/rate-limits>.
-3. Restart `npm run dev`, then run `npm run pregenerate`. This embeds every **public, released** chunk and creates EN and HI Studio packs for the sample reports.
+3. Restart `npm run dev`, then run `npm run pregenerate`. This embeds every **public, released** chunk (for semantic search) and creates EN and HI Studio packs for the sample reports in the Review Queue.
 
 > **Privacy:** the Gemini free tier may use inputs to improve Google products. DhruvGyani only sends content that is **public and past its embargo**, and the server enforces this in `src/lib/policy.ts`. Internal and embargoed items are never sent.
 >

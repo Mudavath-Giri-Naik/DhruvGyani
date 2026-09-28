@@ -6,7 +6,7 @@
 | 2. Library & Search | ✅ done | typecheck ✓ · lint ✓ · 43 unit tests ✓ · build ✓ · API end-to-end test: PDF upload → job → 3 chunks → searchable |
 | 3. Studio & Trust | ✅ done | typecheck ✓ · lint ✓ · 46 unit tests ✓ · build ✓ · API flow: generate → the wrong number "8" is flagged → edit → green · Hindi and internal-source gating verified · scripted browser run of the Studio |
 | 4. WOW & Stretch | ✅ done | typecheck ✓ · lint ✓ · 47 unit tests ✓ · build ✓ · all Phase 4 routes return 200 · Ask, pack builder and access checks tested through the API |
-| 5. Polish | ⏳ | |
+| 5. Polish | ✅ done | `npm run check` ✓ (typecheck, lint, 49 unit tests, build) · 13 Playwright + axe tests ✓ (desktop, mobile, dark) · no horizontal overflow at phone width |
 
 ## Phase 1: Foundation
 - Scaffolded Next.js 16, Tailwind v4, shadcn (`radix-nova`), and community components from Aceternity, Magic UI and animate-ui.
@@ -52,3 +52,18 @@
 - Map (`/map`): Leaflet with OSM tiles fitted to the stations, custom animated markers, popups, and an accessible list underneath.
 - Admin: Team & Roles (allow-list, invite, change role, remove; you can't demote yourself), Settings (branding, languages, channel templates, embargo defaults; migration `0004_settings.sql`), Audit Log.
 - About and Accessibility statement pages.
+
+## Phase 5: Polish
+- Friendly error, 404 and loading states. Loading boundaries only sit on routes that never 404, so real 404s keep their HTTP status.
+- Accessibility: axe (WCAG 2.1 A/AA) on the key pages in light, dark and mobile. Fixes: light-mode contrast for primary, warning, success, muted text and tabs; valid list markup around animations; filter controls use ToggleGroup, not Tabs without panels; the X character meter has a label; focusable scroll regions; toasts use theme colours.
+- Fixed a crash in the ⌘K palette (cmdk needs a `<Command>` root inside the dialog), found by e2e.
+- Hindi: the public-facing strings that were still hardcoded now come from the `ui` namespace. A unit test keeps the EN and HI keys identical.
+- Mobile pass at Pixel 7 size: no horizontal overflow; the Live form is phone-first.
+- `npm run pregenerate` (needs keys) embeds released content and creates EN/HI packs. Without keys it exits with a clear message.
+- README and SETUP finalised.
+
+## Known limitations / next steps
+- Not run against a live Supabase project or Gemini key in this environment (no credentials). The SQL is verified in PGlite, and the AI paths fall back cleanly.
+- OCR for scanned PDFs, DOCX text extraction and a real video player are out of scope. Such items are indexed by title and description.
+- Staff-area (Studio and Admin) labels are partly English only. The public site is fully bilingual.
+- Hindi strings and glossary meanings need review by a Hindi-speaking expert.

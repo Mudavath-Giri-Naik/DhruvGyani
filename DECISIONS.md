@@ -50,3 +50,13 @@ Open choices made while building DhruvGyani, and why. Newest decisions are added
 | D30 | Sample "photos" and expedition covers are **procedural SVG illustrations** (`src/components/polar-art.tsx`), labelled as illustrations. | No NCPOR imagery is copied (§19), and they look good in both themes. |
 | D31 | Station coordinates are rounded and marked **approximate** in data and UI. | They weren't verified against NCPOR. |
 | D32 | Hindi UI strings, glossary meanings and Hindi demo packs are **machine-assisted drafts** that need review by a Hindi speaker. This is marked in code comments and on the glossary page. | The spec asks for this to be flagged. |
+
+## Polish (Phase 5)
+
+| # | Decision | Why |
+|---|---|---|
+| D50 | Loading boundaries only on `/studio/**` and `/explore`. | A `loading.tsx` above a page that calls `notFound()` starts streaming first, which forces HTTP 200 on real 404s. |
+| D51 | Filters (review status, region, explainer level) use **ToggleGroup**, not Tabs. | Tabs without tab panels produce invalid `aria-controls` (axe). |
+| D52 | Light-mode tokens were darkened (primary 0.48, warning 0.52, success 0.50, muted text 0.44), and vendored Tabs use `text-foreground/80`. | These meet WCAG AA contrast, verified with axe. |
+| D53 | Toasts use theme colours, not Sonner `richColors`. | Consistent look, and AA contrast in both themes. |
+| D54 | `npm run pregenerate` runs tsx with `--conditions=react-server`. | Lets scripts import server-only modules. |

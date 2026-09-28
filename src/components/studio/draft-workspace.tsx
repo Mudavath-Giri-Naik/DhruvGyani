@@ -106,7 +106,7 @@ export function DraftView({ generation, active, onCite }: { generation: Generati
       </div>
       {o.channel === "x" && (
         <div className="flex items-center gap-3 text-xs">
-          <Progress value={Math.min(100, (plainLen / 280) * 100)} className={cn("h-1.5 w-40", plainLen > 280 && "[&>div]:bg-destructive")} />
+          <Progress aria-label="Characters used of 280" value={Math.min(100, (plainLen / 280) * 100)} className={cn("h-1.5 w-40", plainLen > 280 && "[&>div]:bg-destructive")} />
           <span className={cn("tabular-nums", plainLen > 280 ? "text-destructive" : "text-muted-foreground")}>{plainLen}/280 characters</span>
         </div>
       )}
@@ -230,7 +230,7 @@ export function TrustPanel({
             {counts.unsupported} {t("unsupported")}
           </Badge>
           {editable && (
-            <Button size="icon-sm" variant="ghost" aria-label={t("recheck")} onClick={() => call("all")} disabled={busy !== null}>
+            <Button size="icon-sm" variant="ghost" aria-label={`${t("recheck")}: all`} onClick={() => call("all")} disabled={busy !== null}>
               <RefreshCw className={cn("size-4", busy === "all" && "animate-spin")} />
             </Button>
           )}

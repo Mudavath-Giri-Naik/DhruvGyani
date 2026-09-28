@@ -10,6 +10,7 @@ import type { GlossaryTerm } from "@/lib/types";
 
 export function GlossaryList({ terms }: { terms: GlossaryTerm[] }) {
   const t = useTranslations("learn");
+  const tu = useTranslations("ui");
   const [q, setQ] = useState("");
   const list = useMemo(() => {
     const n = q.trim().toLowerCase();
@@ -24,7 +25,7 @@ export function GlossaryList({ terms }: { terms: GlossaryTerm[] }) {
           <Search className="absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t("searchGlossary")} aria-label={t("searchGlossary")} className="pl-9" />
         </div>
-        <nav aria-label="Letters" className="flex flex-wrap gap-1">
+        <nav aria-label={tu("letters")} className="flex flex-wrap gap-1">
           {letters.map((l) => (
             <a key={l} href={`#letter-${l}`} className="flex size-7 items-center justify-center rounded-md text-xs font-medium hover:bg-accent">
               {l}
@@ -59,7 +60,7 @@ export function GlossaryList({ terms }: { terms: GlossaryTerm[] }) {
                     {g.meaning_hi}
                   </p>
                   <Link href={`/explore?q=${encodeURIComponent(g.term)}`} className="inline-block pt-1 text-xs text-primary hover:underline">
-                    Find in the archive →
+                    {tu("findInArchive")}
                   </Link>
                 </dd>
               </motion.div>

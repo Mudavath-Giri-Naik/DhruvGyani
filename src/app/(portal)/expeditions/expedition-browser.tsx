@@ -6,7 +6,6 @@ import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { CalendarRange, LayoutGrid, ListTree, Layers } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { PolarArt, artVariant } from "@/components/polar-art";
 import { REGIONS } from "@/lib/constants";
@@ -41,16 +40,16 @@ export function ExpeditionBrowser({ expeditions, counts }: { expeditions: Expedi
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <Tabs value={region} onValueChange={setRegion}>
-          <TabsList className="h-auto flex-wrap">
-            <TabsTrigger value="all">{t("all")}</TabsTrigger>
-            {regions.map((r) => (
-              <TabsTrigger key={r} value={r}>
-                {tr(r)}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <ToggleGroup type="single" variant="outline" size="sm" value={region} onValueChange={(v) => v && setRegion(v)} aria-label="Filter by region" className="flex-wrap justify-start">
+          <ToggleGroupItem value="all" className="px-3">
+            {t("all")}
+          </ToggleGroupItem>
+          {regions.map((r) => (
+            <ToggleGroupItem key={r} value={r} className="px-3">
+              {tr(r)}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
         <ToggleGroup type="single" variant="outline" size="sm" value={view} onValueChange={(v) => v && setView(v as "grid" | "timeline")}>
           <ToggleGroupItem value="grid" aria-label={t("grid")}>
             <LayoutGrid className="size-4" />

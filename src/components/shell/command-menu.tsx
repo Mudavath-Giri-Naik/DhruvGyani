@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Languages, Moon, Search, Sun, FileSearch } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
+  Command,
   CommandDialog,
   CommandEmpty,
   CommandGroup,
@@ -91,6 +92,7 @@ export function CommandMenu({ role }: { role: Role }) {
         </kbd>
       </Button>
       <CommandDialog open={open} onOpenChange={setOpen} title="Command palette" description={t("commandPlaceholder")}>
+        <Command>
         <CommandInput placeholder={t("commandPlaceholder")} value={query} onValueChange={setQuery} />
         <CommandList>
           <CommandEmpty>{t("commandEmpty")}</CommandEmpty>
@@ -139,6 +141,7 @@ export function CommandMenu({ role }: { role: Role }) {
             </CommandItem>
           </CommandGroup>
         </CommandList>
+        </Command>
       </CommandDialog>
     </>
   );

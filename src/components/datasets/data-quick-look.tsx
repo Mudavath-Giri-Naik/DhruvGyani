@@ -20,6 +20,7 @@ import type { DatasetProfile } from "@/lib/types";
  */
 export function DataQuickLook({ profile, csv, itemId }: { profile: DatasetProfile; csv: string | null; itemId: string }) {
   const t = useTranslations("item");
+  const tu = useTranslations("ui");
   const locale = useLocale();
   const numeric = profile.columns.filter((c) => c.kind === "number");
   const [col, setCol] = useState(numeric[0]?.name ?? "");
@@ -113,12 +114,12 @@ export function DataQuickLook({ profile, csv, itemId }: { profile: DatasetProfil
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/40">
-                <TableHead>Column</TableHead>
-                <TableHead>Kind</TableHead>
-                <TableHead className="text-right">Min</TableHead>
-                <TableHead className="text-right">Max</TableHead>
-                <TableHead className="text-right">Mean</TableHead>
-                <TableHead className="text-right">Missing</TableHead>
+                <TableHead>{tu("column")}</TableHead>
+                <TableHead>{tu("kind")}</TableHead>
+                <TableHead className="text-right">{tu("min")}</TableHead>
+                <TableHead className="text-right">{tu("max")}</TableHead>
+                <TableHead className="text-right">{tu("mean")}</TableHead>
+                <TableHead className="text-right">{tu("missing")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -144,7 +145,7 @@ export function DataQuickLook({ profile, csv, itemId }: { profile: DatasetProfil
         </div>
         <div className="rounded-xl border bg-gradient-to-br from-primary/5 to-aurora/5 p-4 text-sm">
           <p className="flex items-center gap-2 font-semibold">
-            <FileSpreadsheet className="size-4 text-primary" /> Data card
+            <FileSpreadsheet className="size-4 text-primary" /> {tu("dataCard")}
           </p>
           <ul className="mt-2 space-y-1.5 text-muted-foreground">
             {card.map((l, i) => (
@@ -152,7 +153,7 @@ export function DataQuickLook({ profile, csv, itemId }: { profile: DatasetProfil
             ))}
           </ul>
           <p className="mt-3 flex items-start gap-1.5 text-[11px] text-muted-foreground">
-            <Info className="mt-0.5 size-3 shrink-0" /> Numbers are computed by code from the file, not by AI. Caveat: check units and gaps before reuse.
+            <Info className="mt-0.5 size-3 shrink-0" /> {tu("dataCaveat")}
           </p>
         </div>
       </div>

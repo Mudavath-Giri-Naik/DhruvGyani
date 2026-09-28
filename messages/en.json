@@ -479,5 +479,37 @@
   "trust": {
     "badge": "Source-cited",
     "reviewed": "Reviewed"
+  },
+  "ui": {
+    "expeditionBegins": "Expedition begins",
+    "expeditionConcludes": "Expedition concludes",
+    "plannedEnd": "Planned end",
+    "openMap": "Open map",
+    "factsNote": "Facts come from reviewed, source-cited stories built on this expedition's items.",
+    "approx": "approx.",
+    "linkedItems": "{count} linked items",
+    "storyMode": "Story Mode",
+    "offlineExtract": "Offline extract (no AI key)",
+    "sourceCited": "source-cited",
+    "hindiNeedsAi": "Hindi explanations need the AI service; showing source sentences.",
+    "dataCard": "Data card",
+    "column": "Column",
+    "kind": "Kind",
+    "min": "Min",
+    "max": "Max",
+    "mean": "Mean",
+    "missing": "Missing",
+    "dataCaveat": "Numbers are computed by code from the file, not by AI. Caveat: check units and gaps before reuse.",
+    "reviewedBy": "Reviewed by",
+    "published": "Published",
+    "openSource": "Open source item →",
+    "findInArchive": "Find in the archive →",
+    "keywordSearch": "Keyword search",
+    "relevance": "relevance",
+    "offlineAnswer": "Offline answer: matching source sentences (no AI key)",
+    "exploreArchive": "Explore the archive",
+    "allTerms": "All {count} terms",
+    "primer": "Primer",
+    "letters": "Letters"
   }
 }

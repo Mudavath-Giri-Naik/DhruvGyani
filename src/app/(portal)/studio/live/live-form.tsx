@@ -98,7 +98,7 @@ export function LiveForm({ expeditions }: { expeditions: Exp[] }) {
         <div className="grid gap-1.5">
           <Label>Expedition</Label>
           <Select value={exp} onValueChange={setExp}>
-            <SelectTrigger className="h-12">
+            <SelectTrigger className="h-12 w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

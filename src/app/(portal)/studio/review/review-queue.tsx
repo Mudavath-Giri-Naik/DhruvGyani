@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Textarea } from "@/components/ui/textarea";
 import { CHANNEL_LABEL, DraftWorkspace } from "@/components/studio/draft-workspace";
 import { addReviewComment, transitionGeneration } from "@/app/actions/review";
@@ -81,16 +81,14 @@ export function ReviewQueue({
 
   return (
     <div className="space-y-4">
-      <Tabs value={filter} onValueChange={(v) => router.push(`/studio/review?status=${v}`)}>
-        <TabsList className="h-auto flex-wrap">
-          {tabs.map(([v, label]) => (
-            <TabsTrigger key={v} value={v} className="gap-1.5">
-              {label}
-              <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums">{v === "all" ? total : (counts[v] ?? 0)}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </Tabs>
+      <ToggleGroup type="single" variant="outline" size="sm" value={filter} onValueChange={(v) => v && router.push(`/studio/review?status=${v}`)} aria-label="Filter by status" className="flex-wrap justify-start">
+        {tabs.map(([v, label]) => (
+          <ToggleGroupItem key={v} value={v} className="gap-1.5 px-3">
+            {label}
+            <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums">{v === "all" ? total : (counts[v] ?? 0)}</span>
+          </ToggleGroupItem>
+        ))}
+      </ToggleGroup>
 
       <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
         <ul className="space-y-2 xl:max-h-[calc(100vh-14rem)] xl:overflow-y-auto xl:pr-1">

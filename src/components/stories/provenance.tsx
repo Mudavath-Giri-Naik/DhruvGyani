@@ -21,6 +21,7 @@ export function Provenance({
   model: string | null;
 }) {
   const t = useTranslations("stories");
+  const tu = useTranslations("ui");
   const when = date ? new Date(date).toLocaleDateString("en-IN", { dateStyle: "medium" }) : "—";
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -47,9 +48,9 @@ export function Provenance({
               <dd>{model ?? "—"}</dd>
               <dt className="text-muted-foreground">{t("promptVersion")}</dt>
               <dd className="font-mono text-xs">{promptVersion}</dd>
-              <dt className="text-muted-foreground">Reviewed by</dt>
+              <dt className="text-muted-foreground">{tu("reviewedBy")}</dt>
               <dd>{reviewer ?? "—"}</dd>
-              <dt className="text-muted-foreground">Published</dt>
+              <dt className="text-muted-foreground">{tu("published")}</dt>
               <dd>{when}</dd>
             </dl>
             <div>
@@ -63,7 +64,7 @@ export function Provenance({
                     </p>
                     <p className="mt-1 text-xs text-muted-foreground">“{c.quote}…”</p>
                     <a href={`/items/${c.item_id}`} className="mt-1 inline-block text-xs text-primary hover:underline">
-                      Open source item →
+                      {tu("openSource")}
                     </a>
                   </li>
                 ))}

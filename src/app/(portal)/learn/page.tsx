@@ -13,7 +13,7 @@ import { QuizCard } from "./quiz-card";
 export const metadata = { title: "Learn" };
 
 export default async function LearnPage() {
-  const [t, repo, viewer] = await Promise.all([getTranslations("learn"), getRepo(), getViewer()]);
+  const [t, tu, repo, viewer] = await Promise.all([getTranslations("learn"), getTranslations("ui"), getRepo(), getViewer()]);
   const [items, glossary] = await Promise.all([repo.listItems(), repo.glossary()]);
   const candidates = items.filter((i) => ["report", "publication", "activity"].includes(i.type) && i.language === "en").slice(0, 8);
   const quizzes = [];
@@ -39,7 +39,7 @@ export default async function LearnPage() {
           <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/30" />
           <div className="relative max-w-2xl space-y-4 p-6 md:p-10">
             <p className="inline-flex items-center gap-2 text-sm font-medium text-primary">
-              <Snowflake className="size-4" /> Primer
+              <Snowflake className="size-4" /> {tu("primer")}
             </p>
             <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">{t("primerTitle")}</h2>
             <p className="leading-relaxed">{t("primer1")}</p>
@@ -47,7 +47,7 @@ export default async function LearnPage() {
             <p className="leading-relaxed text-muted-foreground">{t("primer3")}</p>
             <Button asChild>
               <Link href="/explore">
-                Explore the archive <ArrowRight />
+                {tu("exploreArchive")} <ArrowRight />
               </Link>
             </Button>
           </div>
@@ -64,7 +64,7 @@ export default async function LearnPage() {
                 </h2>
                 <Button asChild variant="ghost" size="sm">
                   <Link href="/learn/glossary">
-                    All {glossary.length} terms <ArrowRight />
+                    {tu("allTerms", { count: glossary.length })} <ArrowRight />
                   </Link>
                 </Button>
               </div>

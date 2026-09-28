@@ -34,11 +34,12 @@ import { NCPOR_COPYRIGHT_URL } from "@/lib/constants";
 const AURORA = ["#3BA7E0", "#2DD4A7", "#7dd3fc", "#a78bfa"];
 
 export default async function LandingPage() {
-  const [t, tn, tc, tr, repo] = await Promise.all([
+  const [t, tn, tc, tr, tu, repo] = await Promise.all([
     getTranslations("landing"),
     getTranslations("nav"),
     getTranslations("common"),
     getTranslations("regions"),
+    getTranslations("ui"),
     getRepo(),
   ]);
   const [counts, latest, expeditions, stations] = await Promise.all([
@@ -212,9 +213,9 @@ export default async function LandingPage() {
                   </h2>
                   <p className="text-muted-foreground">{featured.summary}</p>
                   <div className="mt-auto flex items-center justify-between border-t pt-4 text-sm">
-                    <span className="text-muted-foreground">{featuredItems.length} linked items</span>
+                    <span className="text-muted-foreground">{tu("linkedItems", { count: featuredItems.length })}</span>
                     <span className="inline-flex items-center gap-1 font-medium text-primary">
-                      Story Mode <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                      {tu("storyMode")} <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                     </span>
                   </div>
                 </div>
@@ -295,15 +296,15 @@ export default async function LandingPage() {
               </div>
               <ul className="grid grid-cols-2 gap-3">
                 {stations.map((s, i) => (
-                  <BlurFade key={s.id} inView delay={0.08 * i}>
-                    <li className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md">
+                  <li key={s.id}>
+                  <BlurFade inView delay={0.08 * i} className="h-full rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur-md">
                       <p className="font-semibold">{s.name}</p>
                       <p className="text-xs text-white/70">{tr(s.region)}</p>
                       <p className="mt-2 font-mono text-[11px] text-white/60">
                         {s.lat.toFixed(2)}°, {s.lng.toFixed(2)}°
                       </p>
-                    </li>
                   </BlurFade>
+                  </li>
                 ))}
               </ul>
             </div>

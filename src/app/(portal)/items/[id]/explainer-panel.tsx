@@ -8,7 +8,6 @@ import { BookOpenCheck, BotOff, Database, GraduationCap, Loader2, Microscope, Sc
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { CitedText } from "@/components/cited-text";
 import type { Citation } from "@/lib/types";
@@ -23,6 +22,8 @@ interface Result {
 
 export function ExplainerPanel({ itemId, aiAllowed, hasText }: { itemId: string; aiAllowed: boolean; hasText: boolean }) {
   const t = useTranslations("item");
+  const tu = useTranslations("ui");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const sp = useSearchParams();
   const initialLevel = (["school", "college", "expert"].includes(sp.get("explain") ?? "") ? sp.get("explain") : "school") as Level;
@@ -74,15 +75,13 @@ export function ExplainerPanel({ itemId, aiAllowed, hasText }: { itemId: string;
         </ToggleGroup>
       </div>
       <div className="space-y-4 p-4">
-        <Tabs value={level} onValueChange={(v) => setLevel(v as Level)}>
-          <TabsList className="grid w-full grid-cols-3">
-            {levels.map((l) => (
-              <TabsTrigger key={l.v} value={l.v} className="gap-1.5">
-                <l.icon className="size-4" /> <span className="truncate">{l.label}</span>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        <ToggleGroup type="single" variant="outline" value={level} onValueChange={(v) => v && setLevel(v as Level)} aria-label="Explanation level" className="grid w-full grid-cols-3">
+          {levels.map((l) => (
+            <ToggleGroupItem key={l.v} value={l.v} className="gap-1.5">
+              <l.icon className="size-4" /> <span className="truncate">{l.label}</span>
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
         <div className="min-h-28" aria-live="polite" aria-busy={loading}>
           {loading && !result && (
             <div className="space-y-2">
@@ -109,14 +108,14 @@ export function ExplainerPanel({ itemId, aiAllowed, hasText }: { itemId: string;
                   {result.source === "offline" ? (
                     <Badge variant="outline" className="gap-1">
                       {aiAllowed ? <Database className="size-3" /> : <BotOff className="size-3" />}
-                      {aiAllowed ? "Offline extract (no AI key)" : "AI disabled: not cleared for public release"}
+                      {aiAllowed ? tu("offlineExtract") : tc("aiDisabled")}
                     </Badge>
                   ) : (
                     <Badge variant="outline" className="gap-1">
-                      <Sparkles className="size-3 text-aurora" /> {result.source === "cache" ? t("cached") : "AI"} · source-cited
+                      <Sparkles className="size-3 text-aurora" /> {result.source === "cache" ? t("cached") : "AI"} · {tu("sourceCited")}
                     </Badge>
                   )}
-                  {result.source === "offline" && lang === "hi" && <span>Hindi explanations need the AI service; showing source sentences.</span>}
+                  {result.source === "offline" && lang === "hi" && <span>{tu("hindiNeedsAi")}</span>}
                   {loading && <Loader2 className="size-3 animate-spin" />}
                 </div>
                 {active && (
