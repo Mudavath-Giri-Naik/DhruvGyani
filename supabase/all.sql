@@ -410,8 +410,10 @@ create trigger t_allowed_staff_sync after insert or update on public.allowed_sta
   for each row execute function public.sync_allowed_staff();
 
 -- Users may edit their own profile but never their own role.
+-- SECURITY INVOKER on purpose: current_user must be the caller's role
+-- (authenticated), not the function owner.
 create or replace function public.guard_profile_role() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security invoker set search_path = public as $$
 begin
   if new.role is distinct from old.role
      and not public.is_admin()
