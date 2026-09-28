@@ -30,7 +30,7 @@ const { data: org } = await db.from("organizations").select("id").eq("slug", "nc
 const repo = new SupabaseRepo({ id: null, name: "Pregenerate script", email: null, avatar: null, role: "admin", orgId: org?.id ?? null, demo: false }, db);
 
 // 1. Embeddings for released items only (policy is enforced again inside embedItemChunks).
-const items = (await repo.listItems({ includeNonPublic: true })).filter((i) => isPubliclyVisible(i));
+const items = process.env.SKIP_EMBED === "1" ? [] : (await repo.listItems({ includeNonPublic: true })).filter((i) => isPubliclyVisible(i));
 let embedded = 0;
 for (const item of items) {
   const job = await repo.enqueueJob({ type: "embed_item", payload: {}, item_id: item.id });
@@ -39,9 +39,10 @@ for (const item of items) {
   if (done?.status === "done") embedded++;
   else console.warn(`  ! ${item.title}: ${done?.error}`);
 }
-console.log(`✔ embedded ${embedded}/${items.length} released items`);
+console.log(process.env.SKIP_EMBED === "1" ? "• embeddings skipped (SKIP_EMBED=1)" : `✔ embedded ${embedded}/${items.length} released items`);
 
-// 2. Studio packs, EN + HI.
+// 2. Studio packs, EN + HI. Paced to stay under free-tier per-minute limits.
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let packs = 0;
 for (const itemId of [ITEM.r45, ITEM.rHim, ITEM.rSoe]) {
   for (const language of ["en", "hi"] as const) {
@@ -70,6 +71,7 @@ for (const itemId of [ITEM.r45, ITEM.rHim, ITEM.rSoe]) {
       } catch (e) {
         console.warn(`  ! ${language} ${channel}: ${(e as Error).message}`);
       }
+      await pause(Number(process.env.PREGENERATE_DELAY_MS ?? 8000));
     }
   }
 }

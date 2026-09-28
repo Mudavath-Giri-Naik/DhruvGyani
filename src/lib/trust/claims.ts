@@ -8,8 +8,16 @@ export interface DraftClaim {
   cites: string[]; // citation markers, e.g. ["c1"]
 }
 
+/**
+ * Models often put citation markers after the full stop ("…stations. [c1] Next…").
+ * Move them before the punctuation so each marker stays with its own sentence.
+ */
+export function normaliseMarkers(text: string): string {
+  return text.replace(/([.!?।])((?:\s*\[\s*c\d+(?:\s*,\s*c\d+)*\s*\])+)/g, (_m, punct: string, markers: string) => ` ${markers.trim()}${punct}`);
+}
+
 function splitSentences(text: string): string[] {
-  return text
+  return normaliseMarkers(text)
     .split(/(?<=[.!?।])\s+(?=[^\s])/u)
     .map((s) => s.trim())
     .filter((s) => s.replace(/\[[^\]]*\]/g, "").trim().length > 0);

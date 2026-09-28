@@ -19,7 +19,8 @@
     "sql:bundle": "tsx scripts/bundle-sql.ts",
     "make:sample-pdfs": "tsx scripts/make-sample-pdfs.ts",
     "pregenerate": "tsx --conditions=react-server scripts/pregenerate.ts",
-    "db:build": "tsx scripts/make-sample-pdfs.ts && tsx scripts/gen-seed-sql.ts && tsx scripts/bundle-sql.ts"
+    "db:build": "tsx scripts/make-sample-pdfs.ts && tsx scripts/gen-seed-sql.ts && tsx scripts/bundle-sql.ts",
+    "reverify": "tsx --conditions=react-server scripts/reverify.ts"
   },
   "dependencies": {
     "@google/genai": "^2.24.0",

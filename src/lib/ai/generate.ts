@@ -149,8 +149,10 @@ STRICT RULES
 1. Use ONLY facts stated in the SOURCES. Do not add any fact, number, date, name or claim that is not in them.
 2. After EVERY sentence put the marker(s) of the source(s) that support it, like [c2] or [c1, c3], and list them in "cites".
 3. Copy every number, unit and date exactly as written in the sources.
-4. If a source says it is a SAMPLE or fictional, say the content is a sample.
-5. Return JSON only.
+4. If a source says it is a SAMPLE or fictional, say the content is a sample (never call it "real").
+5. No greetings, sign-offs, opinions or calls to action. Every sentence must state a fact from the sources.
+6. Put citation markers BEFORE the sentence's final punctuation, e.g. "…6 stations [c2]."
+7. Return JSON only.
 
 SOURCES:
 ${sourcesBlock(citations, chunks)}`;

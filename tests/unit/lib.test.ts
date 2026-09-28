@@ -236,3 +236,13 @@ describe("quiz builder", () => {
     expect(qs.every((q) => q.cite === "c1")).toBe(true);
   });
 });
+
+describe("citation markers after punctuation", () => {
+  it("keeps each marker with its own sentence", async () => {
+    const { splitClaims, normaliseMarkers } = await import("@/lib/trust/claims");
+    expect(normaliseMarkers("A fact. [c1] B fact. [c2, c3]")).toBe("A fact [c1]. B fact [c2, c3].");
+    const c = splitClaims({ channel: "x", text: "The team completed 42 CTD casts. [c1] Nets were deployed at 15 stations. [c2]", cites: [], hashtags: [] });
+    expect(c.map((x) => x.cites)).toEqual([["c1"], ["c2"]]);
+    expect(c[1].text.startsWith("Nets")).toBe(true);
+  });
+});
