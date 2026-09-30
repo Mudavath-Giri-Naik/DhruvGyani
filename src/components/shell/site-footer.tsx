@@ -12,7 +12,7 @@ export async function SiteFooter({ className }: { className?: string }) {
       <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p>
           © {new Date().getFullYear()} {tc("appName")} · <span className="lg:max-2xl:hidden">{tc("orgFull")}</span>
-          <span className="hidden lg:max-2xl:inline">{tc("org")}</span> (prototype). {tc("sample")} content is fictional.
+          <span className="hidden lg:max-2xl:inline">{tc("org")}</span> (prototype). {tc("creditsNote")}
         </p>
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/about" className="hover:text-foreground">

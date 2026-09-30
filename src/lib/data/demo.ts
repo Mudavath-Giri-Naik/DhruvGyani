@@ -18,7 +18,7 @@ import {
   expeditions as seedExpeditions,
   items as seedItems,
   org,
-  sampleDocs,
+  archiveNotes,
   sid,
   stations as seedStations,
 } from "@/lib/seed/data";
@@ -78,7 +78,7 @@ function daysAgo(n: number, hour = 10) {
 function initState(): State {
   const items = seedItems.map((i) => ({ ...i }));
   const chunks: Chunk[] = [];
-  for (const [itemId, pages] of Object.entries(sampleDocs)) {
+  for (const [itemId, pages] of Object.entries(archiveNotes)) {
     pages.forEach((content, p) => chunks.push({ id: chunkId(itemId, p + 1), item_id: itemId, page_no: p + 1, chunk_index: p, content }));
   }
   const csv = new Map<string, string>();
@@ -112,7 +112,7 @@ function initState(): State {
   const audit: AuditEntry[] = [
     { id: sid(401), actor_id: sid(12), actor_name: "Sample Curator", action: "item.create", entity: "item", entity_id: seedItems[0].id, meta: { title: seedItems[0].title }, at: daysAgo(6) },
     { id: sid(402), actor_id: sid(12), actor_name: "Sample Curator", action: "generation.submit", entity: "generation", entity_id: sid(205), meta: { channel: "x" }, at: daysAgo(3) },
-    { id: sid(403), actor_id: sid(13), actor_name: "Sample Reviewer", action: "generation.publish", entity: "generation", entity_id: sid(201), meta: { slug: "inside-a-sample-antarctic-field-log" }, at: daysAgo(2) },
+    { id: sid(403), actor_id: sid(13), actor_name: "Sample Reviewer", action: "generation.publish", entity: "generation", entity_id: sid(201), meta: { slug: "a-year-in-the-arctic-ice-mosaic-in-numbers" }, at: daysAgo(2) },
     { id: sid(404), actor_id: sid(14), actor_name: "Sample Admin", action: "role.change", entity: "profile", entity_id: sid(13), meta: { role: "reviewer" }, at: daysAgo(1) },
   ];
 
@@ -126,7 +126,7 @@ function initState(): State {
     generations,
     claims,
     comments: [
-      { id: sid(501), generation_id: sid(205), author_name: "Sample Reviewer", body: "Please double-check the station count against the field log before I approve.", at: daysAgo(2) },
+      { id: sid(501), generation_id: sid(205), author_name: "Sample Reviewer", body: "Please double-check the polar bear count against the archive note before I approve.", at: daysAgo(2) },
     ],
     calendar: buildCalendar(items.filter((i) => isPubliclyVisible(i))),
     searches,

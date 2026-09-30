@@ -9,13 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Frame, FrameBody, Pane } from "@/components/frame";
 import { ItemFlags, SampleBadge, TypeBadge } from "@/components/items/badges";
 import { formatDate } from "@/components/items/item-card";
-import { MediaThumb } from "@/components/items/media-thumb";
+import { MediaThumb, usesCover } from "@/components/items/media-thumb";
 import { TYPE_ICON, TYPE_TONE } from "@/components/items/type-icon";
+import { ShareCard } from "@/components/share/share-card";
 import { SetCrumb } from "@/components/shell/breadcrumbs";
 import { GlossaryText } from "@/components/glossary/glossary-text";
 import { getRepo, getViewer, isStaff } from "@/lib/auth";
 import { bibtexCitation, plainCitation } from "@/lib/citation";
 import { publicEnv } from "@/lib/env";
+import { youtubeEmbed, youtubeId } from "@/lib/media";
 import { isAiAllowed } from "@/lib/policy";
 import { cn } from "@/lib/utils";
 import { ShareButton } from "../../expeditions/[code]/story-client";
@@ -61,8 +63,22 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
     .map((x) => x.i);
   const staff = isStaff(viewer.role);
   const pdf = item.media_url && /\.pdf($|\?)/i.test(item.media_url) ? item.media_url : null;
+  const video = youtubeId(item.media_url);
   const profile = item.type === "dataset" ? await repo.datasetProfile(item.id) : null;
   const csv = profile ? await repo.datasetCsv(item.id) : null;
+
+  // only bundled or uploaded images can be drawn onto a share card (a canvas cannot read other sites' images)
+  const localImage = item.media_url && item.media_url.startsWith("/") && /\.(png|jpe?g|webp)(\?|$)/i.test(item.media_url) ? item.media_url : null;
+  const credit = item.type === "photo" ? `Photo: ${item.authors.join(", ")}${item.license ? ` · ${item.license}` : ""}` : item.authors.length ? `Source: ${item.authors.join(", ")}` : null;
+  const itemUrl = `${publicEnv.siteUrl}/items/${item.id}`;
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const embed = [
+    `<blockquote cite="${esc(itemUrl)}" style="margin:0;padding:16px 20px;border-left:4px solid #1d6fb8;background:#f4f8fb;font-family:system-ui,sans-serif">`,
+    `  <p style="margin:0 0 6px;font-weight:600">${esc(item.title)}</p>`,
+    `  <p style="margin:0 0 10px;color:#334155">${esc(item.description)}</p>`,
+    `  <footer style="font-size:13px;color:#475569">${credit ? `${esc(credit)} · ` : ""}<a href="${esc(itemUrl)}">DhruvGyani · NCPOR</a></footer>`,
+    `</blockquote>`,
+  ].join("\n");
 
   const meta: [string, React.ReactNode][] = [
     [t("expedition"), exp ? <Link key="e" href={`/expeditions/${exp.code}`} className="font-mono text-primary hover:underline">{exp.code}</Link> : "—"],
@@ -73,6 +89,8 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
     [t("language"), item.language === "hi" ? "हिंदी" : "English"],
     [t("license"), item.license ?? "—"],
   ];
+
+  const hasViewer = Boolean(pdf) || item.type === "photo" || item.type === "video" || Boolean(item.type === "dataset" && profile) || !usesCover(item);
 
   const preview = (
     <div className="space-y-4">
@@ -91,26 +109,39 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
           <AlertDescription>{t("externalNote")}</AlertDescription>
         </Alert>
       )}
-      <section aria-label={t("preview")} className="overflow-hidden rounded-xl border bg-background">
-        {item.type === "photo" && (
-          <figure>
-            <MediaThumb item={item} label className="aspect-[16/9] w-full" />
-            {item.alt_text && <figcaption className="border-t px-4 py-3 text-sm text-muted-foreground">{item.alt_text}</figcaption>}
-          </figure>
-        )}
-        {item.type === "video" && (
-          <div className="relative">
-            <MediaThumb item={item} className="aspect-video w-full" />
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/35 text-white">
-              <PlayCircle className="size-14 opacity-90" aria-hidden />
-              <p className="text-sm font-medium">{t("videoPlaceholder")}</p>
-            </div>
-          </div>
-        )}
-        {item.type === "dataset" && profile && <DataQuickLook profile={profile} csv={csv} itemId={item.id} />}
-        {pdf && <iframe src={`${pdf}#view=FitH`} title={`${item.title} (PDF)`} className="h-[70vh] w-full bg-muted fit:h-[56vh]" loading="lazy" />}
-        {!pdf && item.type !== "photo" && item.type !== "video" && !(item.type === "dataset" && profile) && <MediaThumb item={item} className="aspect-[21/9] w-full" />}
-      </section>
+      {hasViewer && (
+        <section aria-label={t("preview")} className="overflow-hidden rounded-xl border bg-background">
+          {item.type === "photo" && (
+            <figure>
+              <MediaThumb item={item} label className="aspect-[3/2] w-full" />
+              {item.alt_text && <figcaption className="border-t px-4 py-3 text-sm text-muted-foreground">{item.alt_text}</figcaption>}
+            </figure>
+          )}
+          {item.type === "video" &&
+            (video ? (
+              <iframe
+                src={youtubeEmbed(video)}
+                title={item.title}
+                className="aspect-video w-full bg-black"
+                loading="lazy"
+                allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+            ) : (
+              <div className="relative">
+                <MediaThumb item={item} className="aspect-video w-full" />
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-black/35 text-white">
+                  <PlayCircle className="size-14 opacity-90" aria-hidden />
+                  <p className="text-sm font-medium">{t("videoPlaceholder")}</p>
+                </div>
+              </div>
+            ))}
+          {item.type === "dataset" && profile && <DataQuickLook profile={profile} csv={csv} itemId={item.id} />}
+          {pdf && <iframe src={`${pdf}#view=FitH`} title={`${item.title} (PDF)`} className="h-[70vh] w-full bg-muted fit:h-[56vh]" loading="lazy" />}
+          {/* documents without a file have nothing to preview; their details are already in the header and sidebar */}
+          {!pdf && item.type !== "photo" && item.type !== "video" && !(item.type === "dataset" && profile) && !usesCover(item) && <MediaThumb item={item} className="aspect-[21/9] w-full" />}
+        </section>
+      )}
     </div>
   );
 
@@ -120,7 +151,7 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
       ? [
           {
             value: "text",
-            label: item.type === "video" ? t("transcript") : t("fullText"),
+            label: item.type === "video" && !video ? t("transcript") : t("fullText"),
             icon: <TextQuote className="size-4" />,
             content: (
               <div className="max-w-3xl space-y-3 text-sm leading-relaxed" lang={item.language}>
@@ -198,7 +229,7 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
             {item.external_url && (
               <Button asChild>
                 <a href={item.external_url} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink /> {t("visitSource")}
+                  <ExternalLink /> {video ? t("watchOnYoutube") : t("visitSource")}
                 </a>
               </Button>
             )}
@@ -215,6 +246,16 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
                 <MessageCircleQuestion /> <span className="max-xl:sr-only">{t("askAbout")}</span>
               </Link>
             </Button>
+            <ShareCard
+              title={item.title}
+              text={item.description}
+              image={localImage}
+              credit={credit}
+              url={itemUrl}
+              tags={item.tags}
+              kicker={exp ? `${tt(item.type)} · ${exp.code}` : tt(item.type)}
+              lang={item.language}
+            />
             <ShareButton title={item.title} />
           </div>
         </header>
@@ -270,7 +311,7 @@ export default async function ItemPage({ params }: PageProps<"/items/[id]">) {
               </Link>
             )}
 
-            <CitePanel plain={plainCitation(item, exp, publicEnv.siteUrl)} bibtex={bibtexCitation(item, exp, publicEnv.siteUrl)} />
+            <CitePanel plain={plainCitation(item, exp, publicEnv.siteUrl)} bibtex={bibtexCitation(item, exp, publicEnv.siteUrl)} embed={embed} />
 
             {staff && <StaffPanel item={item} role={viewer.role} />}
             <p className="shrink-0 px-1 text-xs text-muted-foreground">

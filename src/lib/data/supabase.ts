@@ -210,12 +210,9 @@ export class SupabaseRepo implements Repo {
       const { data } = await this.db.storage.from(f.storage_bucket).download(f.storage_path);
       if (data) return await data.text();
     }
-    const item = await this.getItem(itemId);
-    if (item?.media_url?.startsWith("/samples/")) {
-      const { datasetCsv } = await import("@/lib/seed/data");
-      return datasetCsv[itemId]?.csv() ?? null;
-    }
-    return null;
+    // seeded datasets ship with the app (public/data) rather than in storage
+    const { datasetCsv } = await import("@/lib/seed/data");
+    return datasetCsv[itemId]?.csv() ?? null;
   }
 
   async explainer(itemId: string, level: Explainer["level"], lang: Explainer["language"]) {

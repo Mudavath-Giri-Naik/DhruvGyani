@@ -1,4 +1,5 @@
 import {
+  Activity,
   BookOpen,
   CalendarDays,
   ChartNoAxesColumn,
@@ -61,6 +62,7 @@ export const NAV: NavGroup[] = [
       { key: "library", href: "/library/reports", icon: Library, children: LIBRARY_NAV },
       { key: "stories", href: "/stories", icon: Newspaper },
       { key: "map", href: "/map", icon: Map },
+      { key: "pulse", href: "/pulse", icon: Activity },
       { key: "learn", href: "/learn", icon: GraduationCap },
       { key: "ask", href: "/ask", icon: MessageCircleQuestion },
     ],
@@ -104,6 +106,7 @@ export const SEGMENT_LABELS: Record<string, string> = {
   activities: "activities",
   stories: "stories",
   map: "map",
+  pulse: "pulse",
   learn: "learn",
   glossary: "glossary",
   ask: "ask",

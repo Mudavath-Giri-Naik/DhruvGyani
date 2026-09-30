@@ -3,7 +3,7 @@ import { CalendarDays, Ship } from "lucide-react";
 import type { Item } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ItemFlags, TypeBadge } from "./badges";
-import { MediaThumb } from "./media-thumb";
+import { MediaThumb, usesCover } from "./media-thumb";
 
 export function formatDate(d: string | null | undefined, locale = "en-IN") {
   if (!d) return null;
@@ -40,7 +40,7 @@ export function ItemCard({
           <TypeBadge type={item.type} />
           <ItemFlags item={item} />
         </div>
-        <h3 className="line-clamp-2 font-semibold leading-snug tracking-tight" lang={item.language}>
+        <h3 className={cn("line-clamp-2 font-semibold leading-snug tracking-tight", !compact && usesCover(item) && "sr-only")} lang={item.language}>
           <Link href={`/items/${item.id}`} className="after:absolute after:inset-0 focus-visible:outline-none">
             {item.title}
           </Link>

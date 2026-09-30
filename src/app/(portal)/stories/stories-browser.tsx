@@ -26,8 +26,10 @@ export interface StoryCard {
   reviewer: string | null;
   minutes: number;
   sources: number;
-  thumb: { type: string; media_url: string | null; alt_text: string | null } | null;
+  thumb: { type: string; media_url: string | null; alt_text: string | null; title: string; authors: string[]; event_date: string | null; tags: string[]; source_url: string | null; external_url: string | null } | null;
 }
+
+const pictorial = (s: StoryCard) => !s.thumb || /\.(png|jpe?g|webp|gif)(\?|$)/i.test(s.thumb.media_url ?? "") || /youtu/.test(s.thumb.media_url ?? "");
 
 function Thumb({ story, className }: { story: StoryCard; className?: string }) {
   return story.thumb ? (
@@ -88,9 +90,19 @@ export function StoriesBrowser({ stories }: { stories: StoryCard[] }) {
               lang={active.language}
             >
               <div className="relative min-h-28 flex-1 overflow-hidden">
-                <Thumb story={active} className="absolute inset-0 h-full w-full" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-                <p className="absolute inset-x-4 bottom-3 text-lg leading-snug font-semibold text-balance text-white tall:text-2xl">{active.headline}</p>
+                {pictorial(active) ? (
+                  <>
+                    <Thumb story={active} className="absolute inset-0 h-full w-full" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+                    <p className="absolute inset-x-4 bottom-3 text-lg leading-snug font-semibold text-balance text-white tall:text-2xl">{active.headline}</p>
+                  </>
+                ) : (
+                  <>
+                    {/* no photograph: the designed cover carries the headline itself */}
+                    <Thumb story={{ ...active, thumb: active.thumb && { ...active.thumb, title: active.headline } }} className="absolute inset-0 h-full w-full" />
+                    <p className="sr-only">{active.headline}</p>
+                  </>
+                )}
               </div>
               <div className="min-h-0 shrink space-y-3 overflow-y-auto p-4">
                 <div className="flex flex-wrap gap-1.5" lang="en">

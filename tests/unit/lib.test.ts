@@ -190,7 +190,7 @@ describe("heuristic autofill", () => {
 describe("PDF ingestion", () => {
   it("extracts sample PDF text per page and chunks it with page numbers", async () => {
     const { extractPdfPages } = await import("@/lib/ingest/process");
-    const buf = readFileSync(join(process.cwd(), "public/samples/45-isea-field-log-sample.pdf"));
+    const buf = readFileSync(join(process.cwd(), "tests/fixtures/field-log-sample.pdf"));
     const pages = await extractPdfPages(buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength));
     expect(pages).toHaveLength(3);
     expect(pages[1].text).toContain("6 automatic weather stations");

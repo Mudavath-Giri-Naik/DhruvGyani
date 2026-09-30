@@ -129,6 +129,15 @@ export function PolarArt({ variant = "aurora", className, label }: { variant?: s
   );
 }
 
+/** Expedition cover: the credited photograph when there is one (`/media/…` or a URL), otherwise an illustration (`art:…`). */
+export function Cover({ src, className, fallback = "aurora" }: { src: string | null | undefined; className?: string; fallback?: ArtVariant }) {
+  if (src && !src.startsWith("art:")) {
+    // eslint-disable-next-line @next/next/no-img-element -- bundled or stored photograph, decorative here (the title sits beside it)
+    return <img src={src} alt="" className={cn("h-full w-full object-cover", className)} loading="lazy" />;
+  }
+  return <PolarArt variant={artVariant(src) ?? fallback} className={className} />;
+}
+
 export function artVariant(url: string | null | undefined): string | null {
   return url?.startsWith("art:") ? url.slice(4) : null;
 }

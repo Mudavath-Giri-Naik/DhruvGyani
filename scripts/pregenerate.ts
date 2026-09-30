@@ -44,7 +44,7 @@ console.log(process.env.SKIP_EMBED === "1" ? "• embeddings skipped (SKIP_EMBED
 // 2. Studio packs, EN + HI. Paced to stay under free-tier per-minute limits.
 const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
 let packs = 0;
-for (const itemId of [ITEM.r45, ITEM.rHim, ITEM.rSoe]) {
+for (const itemId of [ITEM.rMosaic, ITEM.rGakkel, ITEM.rRoss]) {
   for (const language of ["en", "hi"] as const) {
     for (const channel of ["website_article", "instagram"] as const) {
       try {

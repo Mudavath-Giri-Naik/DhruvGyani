@@ -14,7 +14,7 @@ import { Frame, FrameBody, FrameHeader, MetaChip, Pane } from "@/components/fram
 import { SampleBadge } from "@/components/items/badges";
 import { TYPE_ICON, TYPE_TONE } from "@/components/items/type-icon";
 import { EmptyState } from "@/components/page-header";
-import { PolarArt, artVariant } from "@/components/polar-art";
+import { Cover } from "@/components/polar-art";
 import { EXPEDITION_STATUSES, ITEM_TYPES, REGIONS } from "@/lib/constants";
 import type { Expedition } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -154,7 +154,7 @@ export function ExpeditionBrowser({
                       )}
                     >
                       <div className="relative aspect-[16/7] overflow-hidden">
-                        <PolarArt variant={artVariant(e.cover_url) ?? "aurora"} className="transition-transform duration-700 group-hover:scale-105" />
+                        <Cover src={e.cover_url} className="transition-transform duration-700 group-hover:scale-105" />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
                         <div className="absolute inset-x-2.5 bottom-2.5 flex items-end justify-between">
                           <span className="rounded-md bg-black/50 px-2 py-0.5 font-mono text-xs font-semibold text-white backdrop-blur">{e.code}</span>
@@ -197,7 +197,7 @@ export function ExpeditionBrowser({
                     )}
                   >
                     <div className="relative hidden aspect-[4/3] w-24 shrink-0 overflow-hidden rounded-lg sm:block">
-                      <PolarArt variant={artVariant(e.cover_url) ?? "aurora"} />
+                      <Cover src={e.cover_url} />
                     </div>
                     <div className="min-w-0 space-y-0.5">
                       <p className="text-xs font-medium text-primary">{dateRange(e, t("tbd"))}</p>
@@ -221,7 +221,7 @@ export function ExpeditionBrowser({
           {active ? (
             <motion.div key={active.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.2 }} className="flex min-h-0 w-full flex-col overflow-hidden rounded-2xl border bg-card shadow-xs">
               <div className="relative h-32 shrink-0 overflow-hidden tall:h-44">
-                <PolarArt variant={artVariant(active.cover_url) ?? "aurora"} />
+                <Cover src={active.cover_url} />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                 <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-1.5">
                   <Badge className="bg-black/55 font-mono text-white backdrop-blur">{active.code}</Badge>

@@ -37,13 +37,13 @@ export function ExternalBadge() {
 }
 
 /** Status flags: sample / external / internal / embargoed / AI disabled. */
-export function ItemFlags({ item, showAi = false }: { item: Item; showAi?: boolean }) {
+export function ItemFlags({ item, showAi = false, hideExternal = false }: { item: Item; showAi?: boolean; hideExternal?: boolean }) {
   const t = useTranslations("common");
   const embargoed = isEmbargoed(item);
   return (
     <>
       {item.is_sample && <SampleBadge />}
-      {item.external_url && <ExternalBadge />}
+      {item.external_url && !hideExternal && <ExternalBadge />}
       {item.visibility === "internal" && (
         <Badge variant="outline" className="gap-1 border-destructive/40 text-destructive">
           <Lock className="size-3" />

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { Frame, FrameBody, MetaChip, Pane } from "@/components/frame";
-import { PolarArt, artVariant } from "@/components/polar-art";
+import { Cover } from "@/components/polar-art";
 import { SetCrumb } from "@/components/shell/breadcrumbs";
 import { SampleBadge } from "@/components/items/badges";
 import { TYPE_ICON, TYPE_TONE, TypeIcon } from "@/components/items/type-icon";
@@ -74,7 +74,7 @@ export default async function ExpeditionStory({ params }: PageProps<"/expedition
           <article className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-xs">
             <header className="relative flex min-h-44 flex-1 flex-col justify-end overflow-hidden short:min-h-36 tall:min-h-56">
               <div className="absolute inset-0">
-                <PolarArt variant={artVariant(exp.cover_url) ?? "aurora"} />
+                <Cover src={exp.cover_url} />
               </div>
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/15" />
               <div className="absolute inset-x-3 top-3 flex flex-wrap items-center gap-1.5">

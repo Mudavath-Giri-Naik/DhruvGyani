@@ -10,7 +10,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { SampleBadge } from "@/components/items/badges";
 import { formatDate } from "@/components/items/item-card";
 import { TYPE_ICON, TYPE_TONE } from "@/components/items/type-icon";
-import { PolarArt, artVariant } from "@/components/polar-art";
+import { Cover } from "@/components/polar-art";
 import { DeniedToast } from "./denied-toast";
 import { getRepo, getViewer } from "@/lib/auth";
 import { LIBRARY_SEGMENTS } from "@/lib/constants";
@@ -201,7 +201,7 @@ export default async function PortalHome({ searchParams }: PageProps<"/portal">)
             className="group relative flex h-full min-h-56 flex-col justify-end overflow-hidden rounded-2xl border shadow-xs transition-shadow hover:shadow-xl fit:min-h-0"
           >
             <div className="absolute inset-0">
-              <PolarArt variant={artVariant(featured.cover_url) ?? "aurora"} className="transition-transform duration-700 group-hover:scale-105" />
+              <Cover src={featured.cover_url} className="transition-transform duration-700 group-hover:scale-105" />
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
             <div className="absolute top-3 right-3 left-3 flex flex-wrap items-center gap-1.5">
@@ -268,7 +268,7 @@ export default async function PortalHome({ searchParams }: PageProps<"/portal">)
               <li key={e.id}>
                 <Link href={`/expeditions/${e.code}`} className="group flex items-center gap-3 rounded-xl px-2 py-2 transition-colors hover:bg-muted/60">
                   <span className="relative h-9 w-14 shrink-0 overflow-hidden rounded-lg border">
-                    <PolarArt variant={artVariant(e.cover_url) ?? "aurora"} />
+                    <Cover src={e.cover_url} />
                   </span>
                   <span className="grid min-w-0 flex-1">
                     <span className="truncate text-sm font-medium group-hover:text-primary">{e.title}</span>

@@ -23,21 +23,21 @@ test.describe("public pages", () => {
     await axe(page);
   });
 
-  test("explore search finds the sample field log", async ({ page }) => {
-    await page.goto("/explore?q=weather%20stations");
-    await expect(page.getByRole("link", { name: /45-ISEA Summer Field Log/ })).toBeVisible();
+  test("explore search finds the MOSAiC archive note", async ({ page }) => {
+    await page.goto("/explore?q=polar%20bears");
+    await expect(page.getByRole("link", { name: /MOSAiC in numbers/ })).toBeVisible();
     await axe(page);
   });
 
   test("expedition Story Mode", async ({ page }) => {
-    await page.goto("/expeditions/45-ISEA");
-    await expect(page.getByRole("heading", { level: 1 })).toContainText("45th Indian Scientific Expedition");
+    await page.goto("/expeditions/MOSAiC");
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("MOSAiC");
     await expect(page.getByRole("tab", { name: /Reports/ })).toBeVisible();
     await axe(page);
   });
 
   test("published story shows provenance", async ({ page }) => {
-    await page.goto("/stories/inside-a-sample-antarctic-field-log");
+    await page.goto("/stories/a-year-in-the-arctic-ice-mosaic-in-numbers");
     await expect(page.getByText(/Source-cited · Reviewed by/)).toBeVisible();
     await axe(page);
   });
@@ -64,22 +64,27 @@ test.describe("public pages", () => {
 test("command palette opens and finds items", async ({ page }) => {
   await page.goto("/portal");
   await page.getByRole("button", { name: /Search pages, items/ }).click();
-  await page.getByRole("combobox").fill("glacier");
-  await expect(page.getByRole("option", { name: /Glacier Mass-Balance Field Notes/ })).toBeVisible();
+  await page.getByRole("combobox").fill("penguin");
+  await expect(page.getByRole("option", { name: /Penguins and Lava Flows Expedition/ })).toBeVisible();
 });
 
 test.describe("staff flow (demo personas)", () => {
   test("curator generates, trust panel flags the wrong number, fix turns it green", async ({ page, context }) => {
     await context.addCookies([{ name: "dg_demo_role", value: "curator", url: "http://localhost:3000" }]);
     await page.goto("/studio/content?items=00000000-0000-4000-a000-000000000101");
-    await page.getByRole("button", { name: "X", exact: true }).click();
+    // the toggles only respond once the page has hydrated, so retry until X is really on
+    const x = page.getByRole("button", { name: "X", exact: true });
+    await expect(async () => {
+      if ((await x.getAttribute("data-state")) !== "on") await x.click();
+      await expect(x).toHaveAttribute("data-state", "on", { timeout: 1000 });
+    }).toPass();
     await page.getByRole("button", { name: "Website article" }).click(); // deselect default
     await page.getByRole("button", { name: "Instagram" }).click(); // deselect default
     await page.getByRole("button", { name: /Generate drafts/ }).click();
-    await expect(page.getByText(/Numbers not in source: 8/)).toBeVisible();
+    await expect(page.getByText(/Numbers not in source: 80/)).toBeVisible();
     await expect(page.getByText(/Approval blocked/)).toBeVisible();
     await page.getByRole("button", { name: "Edit", exact: true }).first().click();
-    await page.getByRole("textbox").last().fill("Sample field log: the team serviced 6 automatic weather stations along the coastal traverse [c2].");
+    await page.getByRole("textbox").last().fill("MOSAiC in numbers: the team sighted 60 polar bears during the year [c3].");
     await page.getByRole("button", { name: "Re-check", exact: true }).first().click();
     await expect(page.getByText(/All claims pass/)).toBeVisible();
     await axe(page);

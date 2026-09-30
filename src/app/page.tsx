@@ -32,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { MagicCard } from "@/components/ui/magic-card";
 import { Marquee } from "@/components/ui/marquee";
 import { Badge } from "@/components/ui/badge";
-import { PolarArt, artVariant } from "@/components/polar-art";
+import { Cover, PolarArt } from "@/components/polar-art";
 import { ItemCard } from "@/components/items/item-card";
 import { Logo } from "@/components/shell/logo";
 import { LocaleSwitch } from "@/components/shell/locale-switch";
@@ -56,7 +56,7 @@ export default async function LandingPage() {
     repo.expeditions(),
     repo.stations(),
   ]);
-  const featured = expeditions.find((e) => e.code === "45-ISEA") ?? expeditions[0];
+  const featured = expeditions.find((e) => e.code === "MOSAiC") ?? expeditions[0];
   const featuredItems = featured ? await repo.listItems({ expeditionId: featured.id }) : [];
   const codeOf = (id: string | null) => expeditions.find((e) => e.id === id)?.code ?? null;
 
@@ -215,7 +215,7 @@ export default async function LandingPage() {
           className="group relative mt-4 grid overflow-hidden rounded-3xl border bg-card shadow-sm transition-shadow hover:shadow-xl md:grid-cols-2"
         >
           <div className="relative aspect-[16/10] md:aspect-auto md:min-h-72 tall:min-h-96">
-            <PolarArt variant={artVariant(featured.cover_url) ?? "antarctic-coast"} className="transition-transform duration-700 group-hover:scale-105" />
+            <Cover src={featured.cover_url} className="transition-transform duration-700 group-hover:scale-105" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent md:bg-gradient-to-r" />
             <Badge className="absolute top-4 left-4 bg-black/50 text-white backdrop-blur">{featured.code}</Badge>
           </div>

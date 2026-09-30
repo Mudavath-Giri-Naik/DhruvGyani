@@ -30,7 +30,7 @@ export default async function StoriesPage() {
         reviewer: s.reviewed_by_name ?? null,
         minutes: Math.max(1, Math.round(words / 200)),
         sources: s.citations.length,
-        thumb: src ? { type: src.type, media_url: src.media_url ?? null, alt_text: src.alt_text ?? null } : null,
+        thumb: src ? { type: src.type, media_url: src.media_url ?? null, alt_text: src.alt_text ?? null, title: src.title, authors: src.authors, event_date: src.event_date, tags: src.tags, source_url: src.source_url, external_url: src.external_url } : null,
       },
     ];
   });

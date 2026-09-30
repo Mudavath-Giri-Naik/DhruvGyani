@@ -10,7 +10,9 @@ import { MediaThumb } from "@/components/items/media-thumb";
 import { formatDate } from "@/components/items/item-card";
 import { SetCrumb } from "@/components/shell/breadcrumbs";
 import { Provenance } from "@/components/stories/provenance";
+import { ShareCard } from "@/components/share/share-card";
 import { getRepo } from "@/lib/auth";
+import { publicEnv } from "@/lib/env";
 import { ShareButton } from "../../expeditions/[code]/story-client";
 import { ListenButton, StoryReader } from "./story-reader";
 
@@ -33,6 +35,10 @@ export default async function StoryPage({ params }: PageProps<"/stories/[slug]">
   const more = others.filter((s) => s.id !== story.id && s.slug && s.output.channel === "website_article").slice(0, 3);
   const plain = [o.headline, o.standfirst, ...o.body.map((p) => strip(p.text))].join(". ");
   const minutes = Math.max(1, Math.round(plain.split(/\s+/).length / 200));
+  // a share card may only carry a photograph we hold locally, and then it carries that photo's credit
+  const pic = items.find((i) => i.media_url?.startsWith("/") && /\.(png|jpe?g|webp)(\?|$)/i.test(i.media_url));
+  const cardImage = pic?.media_url ?? null;
+  const cardCredit = pic ? `Photo: ${pic.authors.join(", ")}${pic.license ? ` · ${pic.license}` : ""}` : t("badgeReviewed", { name: story.reviewed_by_name ?? "NCPOR" });
 
   return (
     <Frame>
@@ -49,6 +55,7 @@ export default async function StoryPage({ params }: PageProps<"/stories/[slug]">
                   <MetaChip icon={CalendarDays}>{formatDate(story.published_at)}</MetaChip>
                   <MetaChip icon={Clock}>{t("minutes", { count: minutes })}</MetaChip>
                   <ListenButton text={plain} lang={story.language} />
+                  <ShareCard title={o.headline} text={o.standfirst} image={cardImage} credit={cardCredit} url={`${publicEnv.siteUrl}/stories/${story.slug}`} kicker={t("cardKicker")} lang={story.language} />
                   <ShareButton title={o.headline} />
                 </div>
               </header>

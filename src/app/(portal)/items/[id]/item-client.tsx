@@ -33,7 +33,7 @@ function CopyBlock({ text }: { text: string }) {
   );
 }
 
-export function CitePanel({ plain, bibtex }: { plain: string; bibtex: string }) {
+export function CitePanel({ plain, bibtex, embed }: { plain: string; bibtex: string; embed: string }) {
   const t = useTranslations("item");
   return (
     <Pane icon={Quote} title={t("cite")} scroll={false} className="shrink-0" bodyClassName="px-4 pb-4">
@@ -41,12 +41,17 @@ export function CitePanel({ plain, bibtex }: { plain: string; bibtex: string }) 
           <TabsList className="w-full">
             <TabsTrigger value="plain">{t("plain")}</TabsTrigger>
             <TabsTrigger value="bibtex">{t("bibtex")}</TabsTrigger>
+            <TabsTrigger value="embed">{t("embed")}</TabsTrigger>
           </TabsList>
           <TabsContent value="plain" className="mt-3">
             <CopyBlock text={plain} />
           </TabsContent>
           <TabsContent value="bibtex" className="mt-3">
             <CopyBlock text={bibtex} />
+          </TabsContent>
+          <TabsContent value="embed" className="mt-3 space-y-2">
+            <p className="text-xs text-muted-foreground">{t("embedBody")}</p>
+            <CopyBlock text={embed} />
           </TabsContent>
         </Tabs>
     </Pane>

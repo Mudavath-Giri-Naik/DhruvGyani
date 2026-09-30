@@ -82,13 +82,13 @@ describe("database: RLS and guards", () => {
 
   it("hybrid search works keyword-only and respects RLS", async () => {
     await as("anon", null, async () => {
-      const r = await db.query<{ item_id: string; snippet: string }>("select * from public.search_items('weather stations')");
+      const r = await db.query<{ item_id: string; snippet: string }>("select * from public.search_items('polar bears')");
       expect(r.rows.length).toBeGreaterThan(0);
-      expect(r.rows.map((x) => x.item_id)).toContain(ITEM.r45);
+      expect(r.rows.map((x) => x.item_id)).toContain(ITEM.rMosaic);
       const hidden = await db.query<{ item_id: string }>("select * from public.search_items('logistics debrief')");
       expect(hidden.rows.map((x) => x.item_id)).not.toContain(ITEM.rInternal);
-      const hi = await db.query<{ item_id: string }>("select * from public.search_items('फ्योर्ड')");
-      expect(hi.rows.map((x) => x.item_id)).toContain(ITEM.pFjordHi);
+      const hi = await db.query<{ item_id: string }>("select * from public.search_items('आर्कटिक')");
+      expect(hi.rows.map((x) => x.item_id)).toContain(ITEM.rMosaicHi);
     });
   });
 
@@ -128,7 +128,7 @@ describe("database: RLS and guards", () => {
       const g = await db.query<{ id: string }>(
         `insert into public.generations (org_id, item_ids, audience, language, channel, prompt_version, output, created_by, status)
          values ($1, array[$2]::uuid[], 'public', 'en', 'x', 'test', '{}'::jsonb, $3, 'in_review') returning id`,
-        [org, ITEM.r45, id],
+        [org, ITEM.rMosaic, id],
       );
       await expect(db.query("update public.generations set status = 'approved' where id = $1", [g.rows[0].id])).rejects.toThrow(/row-level security/);
     });

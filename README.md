@@ -50,7 +50,7 @@ Next.js 16 (App Router, `src/proxy.ts`) · TypeScript strict · Tailwind v4 · s
 | `npm run test:e2e` | Playwright smoke and axe tests (desktop, mobile, dark). Run `npx playwright install chromium` first |
 | `npm run db:migrate` / `db:seed` | Apply migrations and seed to Supabase (needs `SUPABASE_DB_URL`) |
 | `npm run seed:admin` | Make `ADMIN_BOOTSTRAP_EMAILS` admins |
-| `npm run db:build` | Regenerate sample PDFs, `supabase/seed.sql` and `supabase/all.sql` |
+| `npm run db:build` | Regenerate `supabase/seed.sql` and `supabase/all.sql` |
 | `npm run pregenerate` | With keys: embed released content and create EN/HI Studio packs |
 
 ## Project layout

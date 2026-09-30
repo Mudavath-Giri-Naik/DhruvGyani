@@ -60,3 +60,11 @@ Open choices made while building DhruvGyani, and why. Newest decisions are added
 | D52 | Light-mode tokens were darkened (primary 0.48, warning 0.52, success 0.50, muted text 0.44), and vendored Tabs use `text-foreground/80`. | These meet WCAG AA contrast, verified with axe. |
 | D53 | Toasts use theme colours, not Sonner `richColors`. | Consistent look, and AA contrast in both themes. |
 | D54 | `npm run pregenerate` runs tsx with `--conditions=react-server`. | Lets scripts import server-only modules. |
+
+## Real archive content (2026-09-30)
+- The seed (`src/lib/seed/data.ts`) no longer ships fictional public content. Every public item is real and credited: photographs from Wikimedia Commons under public-domain, GODL-India or CC BY / CC BY-SA licences (bundled in `public/media`, credit and licence stored on the item), videos embedded from the publisher's YouTube channel, NSIDC Sea Ice Index v4 series as datasets (`src/lib/seed/seaice.ts`, `public/data`), open-access papers by DOI, and link-and-credit pages for NCPOR, BAS, NSF, WHOI, CIRES and PANGAEA.
+- "Archive notes" are short summaries written for the portal from the linked source page; their numbers are copied from that page. They are the text that search, explainers, quizzes and the Content Studio cite.
+- BAS and WHOI imagery is copyright, so those sources are linked, never copied. Polar-ICE and the Pixabay gallery are not included: their sites could not be reached or verified from the build machine.
+- The only fictional rows left are the two staff-only items that demonstrate internal and embargoed release control (`is_sample: true`, never public).
+- `supabase/seed.sql` now replaces rows in the reserved seed id range before inserting, so a re-seed picks up changed content; rows created through the app are not touched.
+- New: Polar Pulse (`/pulse`), social card maker, website embed code, photo slideshow. All numbers on Polar Pulse are computed by code (`src/lib/datasets/trend.ts`, `src/lib/sun.ts`).

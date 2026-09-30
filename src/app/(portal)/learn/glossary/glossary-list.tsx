@@ -13,7 +13,7 @@ import { Frame, FrameBody, FrameHeader, MetaChip, Pane } from "@/components/fram
 import type { GlossaryTerm } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-// `#term` in the URL selects that term (hover cards and flashcards link here)
+// `#term` in the URL selects that term (glossary hover cards link here)
 const subscribeHash = (cb: () => void) => {
   window.addEventListener("hashchange", cb);
   return () => window.removeEventListener("hashchange", cb);
