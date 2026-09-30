@@ -45,3 +45,4 @@ export const UPLOAD_LIMITS = {
 } as const;
 
 export const NCPOR_COPYRIGHT_URL = "https://ncpor.res.in/pages/display/33-copyright-policy";
+export const GITHUB_URL = "https://github.com/Mudavath-Giri-Naik/DhruvGyani";
