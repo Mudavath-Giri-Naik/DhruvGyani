@@ -7,8 +7,8 @@ import { PolarArt } from "@/components/polar-art";
 export default async function NotFound() {
   const t = await getTranslations("common");
   return (
-    <div className="mx-auto flex max-w-xl flex-col items-center gap-4 px-4 py-20 text-center">
-      <div className="relative h-40 w-full overflow-hidden rounded-3xl border">
+    <div className="mx-auto flex max-w-xl flex-col items-center justify-center gap-4 px-4 py-20 text-center fit:h-full fit:py-6">
+      <div className="relative h-40 w-full shrink-0 overflow-hidden rounded-3xl border shadow-xs">
         <PolarArt variant="snowfield" />
         <span className="absolute inset-0 flex items-center justify-center text-6xl font-bold tracking-tight text-[#081426]/80">404</span>
       </div>

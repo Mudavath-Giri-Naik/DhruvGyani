@@ -5,7 +5,7 @@ import { useState, useTransition } from "react";
 import { ShieldCheck, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pane } from "@/components/frame";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,13 +37,7 @@ export function StaffPanel({ item, role }: { item: Item; role: Role }) {
     });
 
   return (
-    <Card className="border-primary/30">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <ShieldCheck className="size-4 text-primary" /> Staff controls
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="grid gap-3 text-sm">
+    <Pane icon={ShieldCheck} title="Staff controls" scroll={false} className="shrink-0 border-primary/30" bodyClassName="grid gap-3 px-4 pb-4 text-sm">
         <div className="grid gap-1.5">
           <Label htmlFor="st">Status</Label>
           <Select value={status} onValueChange={(v) => setStatus(v as Item["status"])}>
@@ -81,7 +75,6 @@ export function StaffPanel({ item, role }: { item: Item; role: Role }) {
         <Button onClick={save} disabled={pending}>
           {pending && <Loader2 className="animate-spin" />} Save
         </Button>
-      </CardContent>
-    </Card>
+    </Pane>
   );
 }

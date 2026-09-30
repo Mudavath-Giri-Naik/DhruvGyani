@@ -10,6 +10,7 @@ import {
   BotOff,
   CheckCircle2,
   CloudUpload,
+  Cog,
   FileCheck2,
   Globe,
   Link2,
@@ -30,9 +31,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Frame, FrameBody, FrameHeader, Pane } from "@/components/frame";
 import { ITEM_TYPES } from "@/lib/constants";
 import { dHash } from "@/lib/phash";
 import type { Role } from "@/lib/types";
@@ -70,26 +72,29 @@ function releaseValue(r: Release, date: string) {
 
 export function UploadStudio({ role, expeditions, stations }: { role: Role; expeditions: Exp[]; stations: { id: string; name: string }[] }) {
   const t = useTranslations("upload");
+  const [mode, setMode] = useState("single");
   return (
-    <div className="grid gap-6 xl:grid-cols-[1fr_360px]">
-      <Tabs defaultValue="single">
-        <TabsList>
-          <TabsTrigger value="single">
-            <CloudUpload className="size-4" /> {t("title")}
-          </TabsTrigger>
-          <TabsTrigger value="bulk">
-            <FileCheck2 className="size-4" /> {t("bulk")}
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent value="single" className="mt-4">
-          <SingleUpload role={role} expeditions={expeditions} stations={stations} />
-        </TabsContent>
-        <TabsContent value="bulk" className="mt-4">
-          <BulkImport />
-        </TabsContent>
-      </Tabs>
-      <JobsPanel />
-    </div>
+    <Frame>
+      <FrameHeader
+        icon={CloudUpload}
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <ToggleGroup type="single" variant="outline" size="sm" value={mode} onValueChange={(v) => v && setMode(v)} aria-label="Upload mode">
+            <ToggleGroupItem value="single" className="gap-1.5 px-3">
+              <CloudUpload className="size-4" /> Single file
+            </ToggleGroupItem>
+            <ToggleGroupItem value="bulk" className="gap-1.5 px-3">
+              <FileCheck2 className="size-4" /> {t("bulk")}
+            </ToggleGroupItem>
+          </ToggleGroup>
+        }
+      />
+      <FrameBody className="xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-h-0 min-w-0">{mode === "single" ? <SingleUpload role={role} expeditions={expeditions} stations={stations} /> : <BulkImport />}</div>
+        <JobsPanel />
+      </FrameBody>
+    </Frame>
   );
 }
 
@@ -246,8 +251,8 @@ function SingleUpload({ role, expeditions, stations }: { role: Role; expeditions
 
   if (saved) {
     return (
-      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
-        <Card className="border-success/40">
+      <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className="fit:h-full">
+        <Card className="border-success/40 fit:h-full fit:justify-center">
           <CardContent className="flex flex-col items-center gap-3 py-12 text-center">
             <div className="rounded-full bg-success/15 p-3 text-success">
               <CheckCircle2 className="size-8" />
@@ -269,266 +274,272 @@ function SingleUpload({ role, expeditions, stations }: { role: Role; expeditions
   }
 
   return (
-    <div className="space-y-6">
-      {/* step 1 */}
-      <Card>
-        <CardHeader>
-          <StepHeader n={1} title={t("release")} done={releaseReady} />
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div role="radiogroup" aria-label={t("release")} className="grid gap-3 md:grid-cols-3">
-            {releaseOptions.map((o) => (
-              <button
-                key={o.value}
-                type="button"
-                role="radio"
-                aria-checked={release === o.value}
-                onClick={() => {
-                  setRelease(o.value);
-                  setAnalysis(null);
-                  setFile(null);
-                }}
-                className={cn(
-                  "flex flex-col items-start gap-1.5 rounded-xl border p-4 text-left transition-all hover:border-primary/50",
-                  release === o.value && "border-primary bg-primary/5 ring-2 ring-primary/20",
-                )}
-              >
-                <o.icon className={cn("size-5", release === o.value ? "text-primary" : "text-muted-foreground")} />
-                <span className="text-sm font-medium">{o.label}</span>
-                <span className="text-xs text-muted-foreground">{o.hint}</span>
-              </button>
-            ))}
-          </div>
-          {release === "embargo" && (
-            <div className="grid max-w-xs gap-1.5">
-              <Label htmlFor="emb-date">Release date</Label>
-              <Input id="emb-date" type="date" value={embargoDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setEmbargoDate(e.target.value)} />
+    <div className="grid min-h-0 gap-3 lg:grid-cols-2 fit:h-full fit:grid-rows-[minmax(0,1fr)]">
+      <div className="min-h-0 space-y-3 fit:overflow-y-auto fit:p-0.5">
+        {/* step 1 */}
+        <Card>
+          <CardHeader>
+            <StepHeader n={1} title={t("release")} done={releaseReady} />
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div role="radiogroup" aria-label={t("release")} className="grid gap-2">
+              {releaseOptions.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={release === o.value}
+                  onClick={() => {
+                    setRelease(o.value);
+                    setAnalysis(null);
+                    setFile(null);
+                  }}
+                  className={cn(
+                    "flex items-center gap-3 rounded-xl border p-3 text-left transition-all hover:border-primary/50",
+                    release === o.value && "border-primary bg-primary/5 ring-2 ring-primary/20",
+                  )}
+                >
+                  <o.icon className={cn("size-5 shrink-0", release === o.value ? "text-primary" : "text-muted-foreground")} />
+                  <span className="grid">
+                    <span className="text-sm font-medium">{o.label}</span>
+                    <span className="text-xs text-muted-foreground">{o.hint}</span>
+                  </span>
+                </button>
+              ))}
             </div>
-          )}
-          {release && release !== "public" && (
-            <Alert>
-              <BotOff />
-              <AlertTitle>AI disabled: not cleared for public release</AlertTitle>
-              <AlertDescription>This file will not be sent to any AI service. Metadata suggestions use offline rules only.</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* step 2 */}
-      <Card className={cn(!releaseReady && "pointer-events-none opacity-50")} aria-disabled={!releaseReady}>
-        <CardHeader>
-          <StepHeader n={2} title={t("file")} done={Boolean(analysis || link)} />
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div
-            onDragOver={(e) => {
-              e.preventDefault();
-              setDrag(true);
-            }}
-            onDragLeave={() => setDrag(false)}
-            onDrop={(e) => {
-              e.preventDefault();
-              setDrag(false);
-              pick(e.dataTransfer.files?.[0]);
-            }}
-            className={cn(
-              "relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center transition-all",
-              drag ? "scale-[1.01] border-primary bg-primary/5" : "border-border hover:border-primary/50",
+            {release === "embargo" && (
+              <div className="grid max-w-xs gap-1.5">
+                <Label htmlFor="emb-date">Release date</Label>
+                <Input id="emb-date" type="date" value={embargoDate} min={new Date().toISOString().slice(0, 10)} onChange={(e) => setEmbargoDate(e.target.value)} />
+              </div>
             )}
-          >
-            {analyzing ? <Loader2 className="size-8 animate-spin text-primary" /> : <CloudUpload className="size-8 text-primary" />}
-            <p className="text-sm font-medium">{file ? file.name : t("drop")}</p>
-            <p className="text-xs text-muted-foreground">PDF, CSV, JPG/PNG/WebP, MP4, DOCX · max 25 MB</p>
-            <Button type="button" variant="outline" size="sm" className="mt-1" onClick={() => inputRef.current?.click()}>
-              Choose file
-            </Button>
-            <input
-              ref={inputRef}
-              type="file"
-              accept=".pdf,.csv,.jpg,.jpeg,.png,.webp,.mp4,.docx"
-              capture={undefined}
-              className="sr-only"
-              aria-label={t("drop")}
-              onChange={(e) => pick(e.target.files?.[0])}
-            />
-          </div>
-          <div className="grid gap-1.5">
-            <Label htmlFor="ext-link" className="flex items-center gap-1.5 text-muted-foreground">
-              <Link2 className="size-3.5" /> {t("orLink")}
-            </Label>
-            <Input id="ext-link" type="url" placeholder="https://…" value={link} disabled={Boolean(file)} onChange={(e) => setLink(e.target.value)} />
-          </div>
-
-          <AnimatePresence>
-            {analysis && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3 rounded-xl border bg-muted/30 p-4 text-sm">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="secondary" className="uppercase">
-                    {analysis.kind}
-                  </Badge>
-                  {analysis.pages > 0 && <Badge variant="outline">{analysis.pages} pages</Badge>}
-                  {analysis.csv && (
-                    <Badge variant="outline">
-                      {analysis.csv.row_count} rows · {analysis.csv.columns.length} columns
-                    </Badge>
-                  )}
-                  {analysis.exifDate && <Badge variant="outline">EXIF date {analysis.exifDate}</Badge>}
-                  {analysis.source === "ai" ? (
-                    <Badge className="gap-1 bg-aurora text-aurora-foreground">
-                      <Bot className="size-3" /> {t("autofill")}
-                    </Badge>
-                  ) : (
-                    <Badge variant="outline" className="gap-1">
-                      <Wand2 className="size-3" /> Suggested by offline rules{!analysis.aiAllowed ? " (AI disabled)" : !analysis.aiAvailable ? " (no AI key)" : ""}
-                    </Badge>
-                  )}
-                </div>
-                {analysis.warning && (
-                  <p className="flex items-start gap-2 text-warning">
-                    <AlertTriangle className="mt-0.5 size-4 shrink-0" /> {analysis.warning}
-                  </p>
-                )}
-                {analysis.duplicates && analysis.duplicates.length > 0 && (
-                  <p className="flex items-start gap-2 text-warning">
-                    <AlertTriangle className="mt-0.5 size-4 shrink-0" />
-                    Possible duplicate of:{" "}
-                    {analysis.duplicates.map((d) => (
-                      <Link key={d.id} href={`/items/${d.id}`} className="underline" target="_blank">
-                        {d.title}
-                      </Link>
-                    ))}
-                  </p>
-                )}
-                {analysis.textPreview && <p className="line-clamp-3 text-xs text-muted-foreground">{analysis.textPreview}</p>}
-              </motion.div>
+            {release && release !== "public" && (
+              <Alert>
+                <BotOff />
+                <AlertTitle>AI disabled: not cleared for public release</AlertTitle>
+                <AlertDescription>This file will not be sent to any AI service. Metadata suggestions use offline rules only.</AlertDescription>
+              </Alert>
             )}
-          </AnimatePresence>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* step 3 */}
-      <Card className={cn(!(analysis || link) && "pointer-events-none opacity-50")}>
-        <CardHeader>
-          <StepHeader n={3} title="Confirm metadata" />
-          <CardDescription className="flex items-center gap-1.5 pl-10">
-            <Sparkles className="size-3.5 text-aurora" /> Suggestions are pre-filled — check every field before saving.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form
-            className="grid gap-4 md:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              void save();
-            }}
-          >
-            <Field label="Title" error={errors.title} className="md:col-span-2">
-              <Input value={form.title} onChange={(e) => set("title", e.target.value)} required minLength={3} aria-invalid={Boolean(errors.title)} />
-            </Field>
-            <Field label="Type">
-              <Select value={form.type} onValueChange={(v) => set("type", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {ITEM_TYPES.map((x) => (
-                    <SelectItem key={x} value={x}>
-                      {tt(x)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Language">
-              <Select value={form.language} onValueChange={(v) => set("language", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="hi">हिंदी</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Expedition">
-              <Select value={form.expedition_id} onValueChange={(v) => set("expedition_id", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— None —</SelectItem>
-                  {expeditions.map((e) => (
-                    <SelectItem key={e.id} value={e.id}>
-                      {e.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Station">
-              <Select value={form.station_id} onValueChange={(v) => set("station_id", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">— None —</SelectItem>
-                  {stations.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </Field>
-            <Field label="Description" className="md:col-span-2">
-              <Textarea rows={3} value={form.description} onChange={(e) => set("description", e.target.value)} />
-            </Field>
-            <Field label="Authors (comma-separated)">
-              <Input value={form.authors} onChange={(e) => set("authors", e.target.value)} />
-            </Field>
-            <Field label="Date" error={errors.event_date}>
-              <Input type="date" value={form.event_date} onChange={(e) => set("event_date", e.target.value)} />
-            </Field>
-            <Field label="Discipline (comma-separated)">
-              <Input value={form.discipline} onChange={(e) => set("discipline", e.target.value)} placeholder="Glaciology, Meteorology" />
-            </Field>
-            <Field label="Tags (comma-separated)">
-              <Input value={form.tags} onChange={(e) => set("tags", e.target.value)} />
-            </Field>
-            <Field label="Licence">
-              <Input value={form.license} onChange={(e) => set("license", e.target.value)} />
-            </Field>
-            <Field label="Source URL" error={errors.source_url}>
-              <Input type="url" value={form.source_url} onChange={(e) => set("source_url", e.target.value)} placeholder="https://" />
-            </Field>
-            {form.type === "photo" && (
-              <Field label="Alt text (describe what is visible)" className="md:col-span-2">
-                <Textarea rows={2} value={form.alt_text} onChange={(e) => set("alt_text", e.target.value)} />
-              </Field>
-            )}
-            <Field label="Workflow status">
-              <Select value={form.status} onValueChange={(v) => set("status", v)}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="draft">Draft</SelectItem>
-                  <SelectItem value="in_review">Submit for review</SelectItem>
-                  <SelectItem value="published" disabled={role !== "reviewer" && role !== "admin"}>
-                    Publish now {role !== "reviewer" && role !== "admin" ? "(reviewers only)" : ""}
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
-            <div className="flex items-end justify-end md:col-span-2">
-              <Button type="submit" size="lg" disabled={saving || !(file || link) || analyzing}>
-                {saving ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} {t("confirm")}
+        {/* step 2 */}
+        <Card className={cn(!releaseReady && "pointer-events-none opacity-50")} aria-disabled={!releaseReady}>
+          <CardHeader>
+            <StepHeader n={2} title={t("file")} done={Boolean(analysis || link)} />
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div
+              onDragOver={(e) => {
+                e.preventDefault();
+                setDrag(true);
+              }}
+              onDragLeave={() => setDrag(false)}
+              onDrop={(e) => {
+                e.preventDefault();
+                setDrag(false);
+                pick(e.dataTransfer.files?.[0]);
+              }}
+              className={cn(
+                "relative flex flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed p-8 text-center transition-all",
+                drag ? "scale-[1.01] border-primary bg-primary/5" : "border-border hover:border-primary/50",
+              )}
+            >
+              {analyzing ? <Loader2 className="size-8 animate-spin text-primary" /> : <CloudUpload className="size-8 text-primary" />}
+              <p className="text-sm font-medium">{file ? file.name : t("drop")}</p>
+              <p className="text-xs text-muted-foreground">PDF, CSV, JPG/PNG/WebP, MP4, DOCX · max 25 MB</p>
+              <Button type="button" variant="outline" size="sm" className="mt-1" onClick={() => inputRef.current?.click()}>
+                Choose file
               </Button>
+              <input
+                ref={inputRef}
+                type="file"
+                accept=".pdf,.csv,.jpg,.jpeg,.png,.webp,.mp4,.docx"
+                capture={undefined}
+                className="sr-only"
+                aria-label={t("drop")}
+                onChange={(e) => pick(e.target.files?.[0])}
+              />
             </div>
-          </form>
-        </CardContent>
-      </Card>
+            <div className="grid gap-1.5">
+              <Label htmlFor="ext-link" className="flex items-center gap-1.5 text-muted-foreground">
+                <Link2 className="size-3.5" /> {t("orLink")}
+              </Label>
+              <Input id="ext-link" type="url" placeholder="https://…" value={link} disabled={Boolean(file)} onChange={(e) => setLink(e.target.value)} />
+            </div>
+
+            <AnimatePresence>
+              {analysis && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="space-y-3 rounded-xl border bg-muted/30 p-4 text-sm">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge variant="secondary" className="uppercase">
+                      {analysis.kind}
+                    </Badge>
+                    {analysis.pages > 0 && <Badge variant="outline">{analysis.pages} pages</Badge>}
+                    {analysis.csv && (
+                      <Badge variant="outline">
+                        {analysis.csv.row_count} rows · {analysis.csv.columns.length} columns
+                      </Badge>
+                    )}
+                    {analysis.exifDate && <Badge variant="outline">EXIF date {analysis.exifDate}</Badge>}
+                    {analysis.source === "ai" ? (
+                      <Badge className="gap-1 bg-aurora text-aurora-foreground">
+                        <Bot className="size-3" /> {t("autofill")}
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="gap-1">
+                        <Wand2 className="size-3" /> Suggested by offline rules{!analysis.aiAllowed ? " (AI disabled)" : !analysis.aiAvailable ? " (no AI key)" : ""}
+                      </Badge>
+                    )}
+                  </div>
+                  {analysis.warning && (
+                    <p className="flex items-start gap-2 text-warning">
+                      <AlertTriangle className="mt-0.5 size-4 shrink-0" /> {analysis.warning}
+                    </p>
+                  )}
+                  {analysis.duplicates && analysis.duplicates.length > 0 && (
+                    <p className="flex items-start gap-2 text-warning">
+                      <AlertTriangle className="mt-0.5 size-4 shrink-0" />
+                      Possible duplicate of:{" "}
+                      {analysis.duplicates.map((d) => (
+                        <Link key={d.id} href={`/items/${d.id}`} className="underline" target="_blank">
+                          {d.title}
+                        </Link>
+                      ))}
+                    </p>
+                  )}
+                  {analysis.textPreview && <p className="line-clamp-3 text-xs text-muted-foreground">{analysis.textPreview}</p>}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="min-h-0 fit:overflow-y-auto fit:p-0.5">
+        {/* step 3 */}
+        <Card className={cn(!(analysis || link) && "pointer-events-none opacity-50")}>
+          <CardHeader>
+            <StepHeader n={3} title="Confirm metadata" />
+            <CardDescription className="flex items-center gap-1.5 pl-10">
+              <Sparkles className="size-3.5 text-aurora" /> Suggestions are pre-filled — check every field before saving.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="grid gap-4 md:grid-cols-2"
+              onSubmit={(e) => {
+                e.preventDefault();
+                void save();
+              }}
+            >
+              <Field label="Title" error={errors.title} className="md:col-span-2">
+                <Input value={form.title} onChange={(e) => set("title", e.target.value)} required minLength={3} aria-invalid={Boolean(errors.title)} />
+              </Field>
+              <Field label="Type">
+                <Select value={form.type} onValueChange={(v) => set("type", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ITEM_TYPES.map((x) => (
+                      <SelectItem key={x} value={x}>
+                        {tt(x)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Language">
+                <Select value={form.language} onValueChange={(v) => set("language", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="hi">हिंदी</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Expedition">
+                <Select value={form.expedition_id} onValueChange={(v) => set("expedition_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— None —</SelectItem>
+                    {expeditions.map((e) => (
+                      <SelectItem key={e.id} value={e.id}>
+                        {e.code}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Station">
+                <Select value={form.station_id} onValueChange={(v) => set("station_id", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">— None —</SelectItem>
+                    {stations.map((s) => (
+                      <SelectItem key={s.id} value={s.id}>
+                        {s.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Description" className="md:col-span-2">
+                <Textarea rows={3} value={form.description} onChange={(e) => set("description", e.target.value)} />
+              </Field>
+              <Field label="Authors (comma-separated)">
+                <Input value={form.authors} onChange={(e) => set("authors", e.target.value)} />
+              </Field>
+              <Field label="Date" error={errors.event_date}>
+                <Input type="date" value={form.event_date} onChange={(e) => set("event_date", e.target.value)} />
+              </Field>
+              <Field label="Discipline (comma-separated)">
+                <Input value={form.discipline} onChange={(e) => set("discipline", e.target.value)} placeholder="Glaciology, Meteorology" />
+              </Field>
+              <Field label="Tags (comma-separated)">
+                <Input value={form.tags} onChange={(e) => set("tags", e.target.value)} />
+              </Field>
+              <Field label="Licence">
+                <Input value={form.license} onChange={(e) => set("license", e.target.value)} />
+              </Field>
+              <Field label="Source URL" error={errors.source_url}>
+                <Input type="url" value={form.source_url} onChange={(e) => set("source_url", e.target.value)} placeholder="https://" />
+              </Field>
+              {form.type === "photo" && (
+                <Field label="Alt text (describe what is visible)" className="md:col-span-2">
+                  <Textarea rows={2} value={form.alt_text} onChange={(e) => set("alt_text", e.target.value)} />
+                </Field>
+              )}
+              <Field label="Workflow status">
+                <Select value={form.status} onValueChange={(v) => set("status", v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="in_review">Submit for review</SelectItem>
+                    <SelectItem value="published" disabled={role !== "reviewer" && role !== "admin"}>
+                      Publish now {role !== "reviewer" && role !== "admin" ? "(reviewers only)" : ""}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <div className="flex items-end justify-end md:col-span-2">
+                <Button type="submit" size="lg" disabled={saving || !(file || link) || analyzing}>
+                  {saving ? <Loader2 className="animate-spin" /> : <CheckCircle2 />} {t("confirm")}
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
@@ -581,7 +592,7 @@ function BulkImport() {
   const valid = results?.filter((r) => r.ok).length ?? 0;
 
   return (
-    <Card>
+    <Card className="fit:max-h-full fit:overflow-y-auto">
       <CardHeader>
         <CardTitle>{t("bulk")}</CardTitle>
         <CardDescription>{t("bulkBody")}</CardDescription>
@@ -678,52 +689,46 @@ function JobsPanel() {
 
   const tone = { queued: "text-muted-foreground", running: "text-primary", done: "text-success", failed: "text-destructive" };
   return (
-    <Card className="h-fit xl:sticky xl:top-20">
-      <CardHeader>
-        <CardTitle className="text-base">{t("jobs")}</CardTitle>
-        <CardDescription>Extraction → chunking → embeddings (only for released items).</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {jobs.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No jobs yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {jobs.map((j) => (
-              <li key={j.id} className="rounded-lg border p-3 text-sm">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="truncate font-medium">{j.title ?? j.type}</span>
-                  <span className={cn("inline-flex items-center gap-1 text-xs font-medium capitalize", tone[j.status])}>
-                    {j.status === "running" && <Loader2 className="size-3 animate-spin" />}
-                    {j.status}
-                  </span>
-                </div>
-                <p className="mt-1 text-xs text-muted-foreground">
-                  {j.type.replace("_", " ")} · attempt {j.attempts}
-                </p>
-                {j.error && <p className={cn("mt-1 text-xs", j.status === "failed" ? "text-destructive" : "text-muted-foreground")}>{j.error}</p>}
-                <div className="mt-2 flex gap-2">
-                  {j.item_id && (
-                    <Link href={`/items/${j.item_id}`} className="text-xs text-primary hover:underline">
-                      Open item
-                    </Link>
-                  )}
-                  {(j.status === "failed" || j.status === "queued") && (
-                    <button
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                      onClick={async () => {
-                        await fetch(`/api/ingest?retry=${j.id}`, { method: "POST" });
-                        void load();
-                      }}
-                    >
-                      <RotateCcw className="size-3" /> Retry
-                    </button>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </CardContent>
-    </Card>
+    <Pane icon={Cog} title={t("jobs")} description="Extraction → chunking → embeddings." count={jobs.length || undefined}>
+      {jobs.length === 0 ? (
+        <p className="py-6 text-center text-sm text-muted-foreground">No jobs yet.</p>
+      ) : (
+        <ul className="space-y-3">
+          {jobs.map((j) => (
+            <li key={j.id} className="rounded-xl border bg-background p-3 text-sm">
+              <div className="flex items-center justify-between gap-2">
+                <span className="truncate font-medium">{j.title ?? j.type}</span>
+                <span className={cn("inline-flex items-center gap-1 text-xs font-medium capitalize", tone[j.status])}>
+                  {j.status === "running" && <Loader2 className="size-3 animate-spin" />}
+                  {j.status}
+                </span>
+              </div>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {j.type.replace("_", " ")} · attempt {j.attempts}
+              </p>
+              {j.error && <p className={cn("mt-1 text-xs", j.status === "failed" ? "text-destructive" : "text-muted-foreground")}>{j.error}</p>}
+              <div className="mt-2 flex gap-2">
+                {j.item_id && (
+                  <Link href={`/items/${j.item_id}`} className="text-xs text-primary hover:underline">
+                    Open item
+                  </Link>
+                )}
+                {(j.status === "failed" || j.status === "queued") && (
+                  <button
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                    onClick={async () => {
+                      await fetch(`/api/ingest?retry=${j.id}`, { method: "POST" });
+                      void load();
+                    }}
+                  >
+                    <RotateCcw className="size-3" /> Retry
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Pane>
   );
 }

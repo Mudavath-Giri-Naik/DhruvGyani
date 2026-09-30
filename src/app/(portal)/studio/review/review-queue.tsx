@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { motion } from "motion/react";
-import { CheckCircle2, ExternalLink, Globe, Loader2, MessageSquare, RotateCcw, Send, ShieldAlert, ThumbsDown, ThumbsUp, UserRound } from "lucide-react";
+import { CheckCircle2, ExternalLink, Globe, ListChecks, Loader2, MessageSquare, RotateCcw, Send, ShieldAlert, ThumbsDown, ThumbsUp, UserRound } from "lucide-react";
 import { toast } from "sonner";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Textarea } from "@/components/ui/textarea";
+import { Frame, FrameBody, FrameHeader, Pane } from "@/components/frame";
 import { CHANNEL_LABEL, DraftWorkspace } from "@/components/studio/draft-workspace";
 import { addReviewComment, transitionGeneration } from "@/app/actions/review";
 import { approvalBlockers } from "@/lib/trust/claims";
@@ -79,54 +79,112 @@ export function ReviewQueue({
   const blockers = approvalBlockers(claims);
   const own = g && g.created_by === viewer.id && viewer.role !== "admin";
 
-  return (
-    <div className="space-y-4">
-      <ToggleGroup type="single" variant="outline" size="sm" value={filter} onValueChange={(v) => v && router.push(`/studio/review?status=${v}`)} aria-label="Filter by status" className="flex-wrap justify-start">
-        {tabs.map(([v, label]) => (
-          <ToggleGroupItem key={v} value={v} className="gap-1.5 px-3">
-            {label}
-            <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums">{v === "all" ? total : (counts[v] ?? 0)}</span>
-          </ToggleGroupItem>
+  const commentsTab = detail && g && (
+    <section aria-labelledby="comments-h" className="space-y-3">
+      <h3 id="comments-h" className="flex items-center gap-2 font-semibold">
+        <MessageSquare className="size-4 text-primary" /> {t("comments")}
+      </h3>
+      {detail.comments.length === 0 && <p className="text-sm text-muted-foreground">No comments yet.</p>}
+      <ul className="space-y-3">
+        {detail.comments.map((c) => (
+          <li key={c.id} className="flex gap-3 text-sm">
+            <Avatar className="size-7">
+              <AvatarFallback className="text-[10px]">{c.author_name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+            <div>
+              <p className="text-xs text-muted-foreground">
+                <span className="font-medium text-foreground">{c.author_name}</span> · {new Date(c.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
+              </p>
+              <p className="mt-0.5">{c.body}</p>
+            </div>
+          </li>
         ))}
-      </ToggleGroup>
+      </ul>
+      <form
+        className="grid gap-2"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (!comment.trim()) return;
+          start(async () => {
+            await addReviewComment(g.id, comment);
+            setComment("");
+            router.refresh();
+          });
+        }}
+      >
+        <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("addComment")} rows={3} aria-label={t("addComment")} />
+        <Button type="submit" disabled={pending || !comment.trim()} className="justify-self-end">
+          {t("post")}
+        </Button>
+      </form>
+    </section>
+  );
 
-      <div className="grid gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
-        <ul className="space-y-2 xl:max-h-[calc(100vh-14rem)] xl:overflow-y-auto xl:pr-1">
-          {list.length === 0 && <li className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">{t("empty")}</li>}
-          {list.map((item, i) => (
-            <motion.li key={item.id} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}>
-              <Link
-                href={`/studio/review?status=${filter}&id=${item.id}`}
-                scroll={false}
-                onClick={() => setLiveClaims(null)}
-                className={cn(
-                  "block rounded-xl border p-3 text-sm transition-all hover:border-primary/40",
-                  g?.id === item.id ? "border-primary bg-primary/5 ring-2 ring-primary/15" : "bg-card",
-                )}
-              >
-                <div className="flex items-center gap-2 text-xs">
-                  <Badge variant="secondary">{CHANNEL_LABEL[item.channel]}</Badge>
-                  <span className="uppercase text-muted-foreground">{item.language}</span>
-                  <span className={cn("ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium capitalize", STATUS_TONE[item.status])}>{item.status.replace("_", " ")}</span>
-                </div>
-                <p className="mt-2 line-clamp-2 font-medium" lang={item.language}>
-                  {title(item)}
-                </p>
-                <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                  <UserRound className="size-3" /> {item.created_by_name ?? "Staff"} · {new Date(item.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
-                </p>
-              </Link>
-            </motion.li>
-          ))}
-        </ul>
+  return (
+    <Frame>
+      <FrameHeader
+        icon={ListChecks}
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <ToggleGroup type="single" variant="outline" size="sm" value={filter} onValueChange={(v) => v && router.push(`/studio/review?status=${v}`)} aria-label="Filter by status" className="flex-wrap justify-start">
+            {tabs.map(([v, label]) => (
+              <ToggleGroupItem key={v} value={v} className="gap-1.5 px-2.5">
+                {label}
+                <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums">{v === "all" ? total : (counts[v] ?? 0)}</span>
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        }
+      />
+
+      <FrameBody className="xl:grid-cols-[19rem_minmax(0,1fr)]">
+        <Pane icon={ListChecks} title="Queue" count={list.length} bodyClassName="px-2">
+          <ul className="space-y-1.5">
+            {list.length === 0 && <li className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">{t("empty")}</li>}
+            {list.map((item, i) => (
+              <motion.li key={item.id} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.03 }}>
+                <Link
+                  href={`/studio/review?status=${filter}&id=${item.id}`}
+                  scroll={false}
+                  onClick={() => setLiveClaims(null)}
+                  aria-current={g?.id === item.id ? "true" : undefined}
+                  className={cn("block rounded-xl border p-2.5 text-sm transition-all hover:border-primary/40", g?.id === item.id ? "border-primary bg-primary/5 ring-2 ring-primary/15" : "bg-background")}
+                >
+                  <div className="flex items-center gap-2 text-xs">
+                    <Badge variant="secondary">{CHANNEL_LABEL[item.channel]}</Badge>
+                    <span className="text-muted-foreground uppercase">{item.language}</span>
+                    <span className={cn("ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium capitalize", STATUS_TONE[item.status])}>{item.status.replace("_", " ")}</span>
+                  </div>
+                  <p className="mt-1.5 line-clamp-2 leading-snug font-medium" lang={item.language}>
+                    {title(item)}
+                  </p>
+                  <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                    <UserRound className="size-3" /> {item.created_by_name ?? "Staff"} · {new Date(item.updated_at).toLocaleDateString("en-IN", { day: "numeric", month: "short" })}
+                  </p>
+                </Link>
+              </motion.li>
+            ))}
+          </ul>
+        </Pane>
 
         {detail && g ? (
-          <div className="min-w-0 space-y-4">
-            <div className="flex flex-wrap items-center gap-2 rounded-2xl border bg-card p-3">
+          <div className="flex min-h-0 min-w-0 flex-col gap-3">
+            <div className="flex shrink-0 flex-wrap items-center gap-2 rounded-2xl border bg-card px-3 py-2 shadow-xs">
               <span className={cn("rounded-full px-2.5 py-1 text-xs font-medium capitalize", STATUS_TONE[g.status])}>{g.status.replace("_", " ")}</span>
               {blockers.blocked && (
                 <span className="inline-flex items-center gap-1 text-xs font-medium text-destructive">
                   <ShieldAlert className="size-4" /> Blocked by Trust Panel
+                </span>
+              )}
+              {own && g.status === "in_review" && reviewer && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <UserRound className="size-3.5" /> {t("ownWork")}
+                </span>
+              )}
+              {!reviewer && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <CheckCircle2 className="size-3.5" /> {t("curatorNote")}
                 </span>
               )}
               <div className="ml-auto flex flex-wrap gap-2">
@@ -164,69 +222,32 @@ export function ReviewQueue({
                 )}
               </div>
             </div>
-            {own && g.status === "in_review" && reviewer && (
-              <Alert>
-                <UserRound />
-                <AlertDescription>{t("ownWork")}</AlertDescription>
-              </Alert>
-            )}
-            {!reviewer && (
-              <p className="text-xs text-muted-foreground">
-                <CheckCircle2 className="mr-1 inline size-3.5" />
-                {t("curatorNote")}
-              </p>
-            )}
 
             <DraftWorkspace
+              className="flex-1"
               generation={g}
               claims={detail.claims}
               chunks={detail.chunks}
               editable={g.status === "draft" || g.status === "in_review"}
               onChange={(_g, c) => setLiveClaims(c)}
+              extraTabs={[
+                {
+                  value: "comments",
+                  label: (
+                    <>
+                      {t("comments")}
+                      <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums">{detail.comments.length}</span>
+                    </>
+                  ),
+                  content: commentsTab,
+                },
+              ]}
             />
-
-            <section aria-labelledby="comments-h" className="space-y-3 rounded-2xl border bg-card p-4">
-              <h3 id="comments-h" className="flex items-center gap-2 font-semibold">
-                <MessageSquare className="size-4 text-primary" /> {t("comments")}
-              </h3>
-              <ul className="space-y-3">
-                {detail.comments.map((c) => (
-                  <li key={c.id} className="flex gap-3 text-sm">
-                    <Avatar className="size-7">
-                      <AvatarFallback className="text-[10px]">{c.author_name.slice(0, 2).toUpperCase()}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <p className="text-xs text-muted-foreground">
-                        <span className="font-medium text-foreground">{c.author_name}</span> · {new Date(c.at).toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                      </p>
-                      <p className="mt-0.5">{c.body}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-              <form
-                className="flex gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  if (!comment.trim()) return;
-                  start(async () => {
-                    await addReviewComment(g.id, comment);
-                    setComment("");
-                    router.refresh();
-                  });
-                }}
-              >
-                <Textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t("addComment")} rows={2} aria-label={t("addComment")} />
-                <Button type="submit" disabled={pending || !comment.trim()} className="self-end">
-                  {t("post")}
-                </Button>
-              </form>
-            </section>
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">{t("empty")}</div>
+          <div className="flex items-center justify-center rounded-2xl border border-dashed p-10 text-center text-sm text-muted-foreground">{t("empty")}</div>
         )}
-      </div>
-    </div>
+      </FrameBody>
+    </Frame>
   );
 }

@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { CitedText } from "@/components/cited-text";
 import type { Chunk, Generation, GenerationClaim } from "@/lib/types";
@@ -139,7 +140,7 @@ export function SourcePassages({ generation, chunks, active, onCite }: { generat
   return (
     <div className="space-y-2">
       <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">{t("sourcePassages")}</p>
-      <ol className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
+      <ol className="space-y-2">
         {generation.citations.map((c) => {
           const chunk = chunks.find((x) => x.id === c.chunk_id);
           return (
@@ -214,7 +215,7 @@ export function TrustPanel({
   const markerOf = (c: GenerationClaim) => generation.citations.find((x) => x.chunk_id === c.chunk_id)?.marker ?? null;
 
   return (
-    <section aria-labelledby={`trust-${generation.id}`} className="space-y-3 rounded-2xl border bg-card p-4">
+    <section aria-labelledby={`trust-${generation.id}`} className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 id={`trust-${generation.id}`} className="flex items-center gap-2 font-semibold">
           {flagged ? <ShieldAlert className="size-5 text-destructive" /> : <ShieldCheck className="size-5 text-success" />} {t("trust")}
@@ -317,6 +318,17 @@ export function TrustPanel({
 
 // ------------------------------------------------------------------------------------------ workspace
 
+export interface WorkspaceTab {
+  value: string;
+  label: React.ReactNode;
+  content: React.ReactNode;
+}
+
+/**
+ * Draft on the left, Trust Panel / source passages (and any extra tabs) on the
+ * right. On desktop both sides scroll inside their own card so the workspace
+ * fits one frame.
+ */
 export function DraftWorkspace({
   generation: g0,
   claims: c0,
@@ -324,6 +336,8 @@ export function DraftWorkspace({
   editable,
   footer,
   onChange,
+  extraTabs = [],
+  className,
 }: {
   generation: Generation;
   claims: GenerationClaim[];
@@ -331,6 +345,8 @@ export function DraftWorkspace({
   editable: boolean;
   footer?: (g: Generation, claims: GenerationClaim[]) => React.ReactNode;
   onChange?: (g: Generation, claims: GenerationClaim[]) => void;
+  extraTabs?: WorkspaceTab[];
+  className?: string;
 }) {
   const t = useTranslations("studio");
   const tc = useTranslations("common");
@@ -338,6 +354,7 @@ export function DraftWorkspace({
   const [claims, setClaims] = useState(c0);
   const [chunks, setChunks] = useState(ch0);
   const [active, setActive] = useState<string | null>(null);
+  const [side, setSide] = useState("trust");
   const [prev, setPrev] = useState(g0);
   if (prev !== g0) {
     setPrev(g0);
@@ -345,13 +362,20 @@ export function DraftWorkspace({
     setClaims(c0);
     setChunks(ch0);
   }
+  const flagged = claims.filter((c) => c.verdict === "unsupported" || c.number_misses.length > 0).length;
+  // clicking a citation chip in the draft jumps to its source passage
+  const cite = (m: string) => {
+    setActive(m);
+    setSide("sources");
+  };
+  const pane = "min-h-0 p-3 fit:overflow-y-auto";
 
   return (
-    <div className="space-y-4">
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
-        <div className="space-y-3 rounded-2xl border bg-card p-5">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2 text-xs">
+    <div className={cn("flex min-h-0 flex-col gap-3", className)}>
+      <div className="grid min-h-0 flex-1 gap-3 lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[minmax(0,1fr)_25rem] fit:grid-rows-[minmax(0,1fr)]">
+        <div className="flex min-h-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-xs">
+          <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 border-b px-4 py-2">
+            <div className="flex flex-wrap items-center gap-1.5 text-xs">
               <Badge variant="secondary">{CHANNEL_LABEL[generation.channel]}</Badge>
               <Badge variant="outline">{generation.language === "hi" ? "हिंदी" : "English"}</Badge>
               <Badge variant="outline" className="capitalize">
@@ -362,7 +386,7 @@ export function DraftWorkspace({
               </Badge>
               {generation.model && <span className="text-muted-foreground">{generation.model}</span>}
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-0.5">
               <Button
                 size="sm"
                 variant="ghost"
@@ -391,26 +415,55 @@ export function DraftWorkspace({
               </Button>
             </div>
           </div>
-          <DraftView generation={generation} active={active} onCite={setActive} />
+          <div className="min-h-0 flex-1 p-4 fit:overflow-y-auto">
+            <DraftView generation={generation} active={active} onCite={cite} />
+          </div>
         </div>
-        <div className="rounded-2xl border bg-card p-4">
-          <SourcePassages generation={generation} chunks={chunks} active={active} onCite={setActive} />
-        </div>
+
+        <Tabs value={side} onValueChange={setSide} className="min-h-0 gap-0 overflow-hidden rounded-2xl border bg-card shadow-xs">
+          <div className="shrink-0 border-b px-3 py-2">
+            <TabsList className="w-full">
+              <TabsTrigger value="trust" className="gap-1.5">
+                {t("trust")}
+                <span className={cn("size-2 rounded-full", flagged ? "bg-destructive" : "bg-success")} aria-hidden />
+              </TabsTrigger>
+              <TabsTrigger value="sources" className="gap-1.5">
+                Sources
+                <span className="rounded-full bg-muted px-1.5 text-[10px] tabular-nums">{generation.citations.length}</span>
+              </TabsTrigger>
+              {extraTabs.map((x) => (
+                <TabsTrigger key={x.value} value={x.value} className="gap-1.5">
+                  {x.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </div>
+          <TabsContent value="trust" className={pane}>
+            <TrustPanel
+              generation={generation}
+              claims={claims}
+              editable={editable}
+              onFocusClaim={setActive}
+              onUpdated={(g, c, ch) => {
+                setGeneration(g);
+                setClaims(c);
+                setChunks(ch);
+                onChange?.(g, c);
+                toast.success(t("recheck") + " ✓");
+              }}
+            />
+          </TabsContent>
+          <TabsContent value="sources" className={pane}>
+            <SourcePassages generation={generation} chunks={chunks} active={active} onCite={setActive} />
+          </TabsContent>
+          {extraTabs.map((x) => (
+            <TabsContent key={x.value} value={x.value} className={pane}>
+              {x.content}
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
-      <TrustPanel
-        generation={generation}
-        claims={claims}
-        editable={editable}
-        onFocusClaim={setActive}
-        onUpdated={(g, c, ch) => {
-          setGeneration(g);
-          setClaims(c);
-          setChunks(ch);
-          onChange?.(g, c);
-          toast.success(t("recheck") + " ✓");
-        }}
-      />
-      {footer?.(generation, claims)}
+      {footer && <div className="shrink-0">{footer(generation, claims)}</div>}
     </div>
   );
 }

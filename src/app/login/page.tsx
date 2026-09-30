@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { ArrowLeft, ShieldCheck, UserRound, PenTool, BadgeCheck, Crown } from "lucide-react";
+import { ArrowLeft, ArrowRight, ShieldCheck, UserRound, PenTool, BadgeCheck, Crown } from "lucide-react";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { PolarArt } from "@/components/polar-art";
 import { Logo } from "@/components/shell/logo";
 import { GoogleButton } from "./google-button";
 import { setDemoRole } from "@/app/actions/prefs";
@@ -22,7 +23,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const sp = await searchParams;
   const next = safeNext(typeof sp.next === "string" ? sp.next : undefined);
   const error = typeof sp.error === "string";
-  const [t, tr, viewer] = await Promise.all([getTranslations("login"), getTranslations("roles"), getViewer()]);
+  const [t, tr, tc, viewer] = await Promise.all([getTranslations("login"), getTranslations("roles"), getTranslations("common"), getViewer()]);
   const supabase = isSupabaseConfigured();
 
   async function pickRole(formData: FormData) {
@@ -40,59 +41,88 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   ] as const;
 
   return (
-    <AuroraBackground className="min-h-screen px-4 py-10">
-      <main id="main" className="relative z-10 w-full max-w-md">
+    <AuroraBackground className="min-h-svh px-4 py-10 fit:py-4">
+      <main id="main" className="relative z-10 w-full max-w-md lg:max-w-4xl">
         <BlurFade>
-          <Link href="/" className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
+          <Link href="/" className="mb-4 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground">
             <ArrowLeft className="size-4" /> DhruvGyani
           </Link>
-          <div className="glass rounded-3xl p-6 shadow-2xl shadow-primary/10 md:p-8">
-            <Logo className="size-12" />
-            <h1 className="mt-5 text-2xl font-semibold tracking-tight">{t("title")}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
-
-            {error && (
-              <Alert variant="destructive" className="mt-4">
-                <AlertDescription>{t("error")}</AlertDescription>
-              </Alert>
-            )}
-
-            <div className="mt-6">
-              <GoogleButton next={next} disabled={!supabase} label={t("google")} />
-              <p className="mt-2 text-center text-xs text-muted-foreground">{t("privacy")}</p>
+          <div className="glass grid overflow-hidden rounded-3xl shadow-2xl shadow-primary/10 lg:grid-cols-2">
+            {/* brand panel (desktop) */}
+            <div className="relative hidden min-h-[26rem] flex-col justify-end overflow-hidden p-8 text-white lg:flex">
+              <div className="absolute inset-0">
+                <PolarArt variant="aurora" />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/10" />
+              <div className="relative">
+                <p className="text-3xl font-semibold tracking-tight" lang="hi">
+                  {tc("appNameHi")}
+                </p>
+                <p className="mt-1 text-sm text-white/80">{tc("tagline")}</p>
+                <div className="mt-5 rounded-2xl border border-white/15 bg-white/10 p-4 text-sm backdrop-blur-md">
+                  <p className="flex items-center gap-2 font-medium">
+                    <ShieldCheck className="size-4" aria-hidden /> {t("why")}
+                  </p>
+                  <p className="mt-2 text-white/80">{t("whyMember")}</p>
+                  <p className="mt-1 text-white/80">{t("whyStaff")}</p>
+                </div>
+              </div>
             </div>
 
-            {!supabase && (
-              <div className="mt-6 border-t pt-6">
-                <p className="text-sm font-medium">{t("demoTitle")}</p>
-                <p className="mt-1 text-xs text-muted-foreground">{t("demoBody")}</p>
-                <form action={pickRole} className="mt-4 grid grid-cols-2 gap-2">
-                  <input type="hidden" name="next" value={next} />
-                  {personas.map((p) => (
-                    <Button
-                      key={p.role}
-                      type="submit"
-                      name="role"
-                      value={p.role}
-                      variant={viewer.role === p.role ? "default" : "outline"}
-                      className="h-auto flex-col items-start gap-0.5 rounded-xl px-3 py-2.5 text-left"
-                    >
-                      <span className="flex items-center gap-1.5 font-medium">
-                        <p.icon className="size-4" /> {tr(p.role)}
-                      </span>
-                      <span className="text-[11px] font-normal opacity-70">{p.hint}</span>
-                    </Button>
-                  ))}
-                </form>
-              </div>
-            )}
+            <div className="p-6 md:p-8">
+              <Logo className="size-12" />
+              <h1 className="mt-5 text-2xl font-semibold tracking-tight">{t("title")}</h1>
+              <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
 
-            <div className="mt-6 rounded-xl bg-muted/50 p-4 text-sm">
-              <p className="flex items-center gap-2 font-medium">
-                <ShieldCheck className="size-4 text-primary" /> {t("why")}
-              </p>
-              <p className="mt-2 text-muted-foreground">{t("whyMember")}</p>
-              <p className="mt-1 text-muted-foreground">{t("whyStaff")}</p>
+              {error && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription>{t("error")}</AlertDescription>
+                </Alert>
+              )}
+
+              <div className="mt-6">
+                <GoogleButton next={next} disabled={!supabase} label={t("google")} />
+                <p className="mt-2 text-center text-xs text-muted-foreground">{t("privacy")}</p>
+              </div>
+
+              {!supabase && (
+                <div className="mt-6 border-t pt-6">
+                  <p className="text-sm font-medium">{t("demoTitle")}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{t("demoBody")}</p>
+                  <form action={pickRole} className="mt-4 grid grid-cols-2 gap-2">
+                    <input type="hidden" name="next" value={next} />
+                    {personas.map((p) => (
+                      <Button
+                        key={p.role}
+                        type="submit"
+                        name="role"
+                        value={p.role}
+                        variant={viewer.role === p.role ? "default" : "outline"}
+                        className="h-auto flex-col items-start gap-0.5 rounded-xl px-3 py-2.5 text-left"
+                      >
+                        <span className="flex items-center gap-1.5 font-medium">
+                          <p.icon className="size-4" /> {tr(p.role)}
+                        </span>
+                        <span className="text-[11px] font-normal opacity-70">{p.hint}</span>
+                      </Button>
+                    ))}
+                  </form>
+                </div>
+              )}
+
+              <div className="mt-6 rounded-xl bg-muted/50 p-4 text-sm lg:hidden">
+                <p className="flex items-center gap-2 font-medium">
+                  <ShieldCheck className="size-4 text-primary" /> {t("why")}
+                </p>
+                <p className="mt-2 text-muted-foreground">{t("whyMember")}</p>
+                <p className="mt-1 text-muted-foreground">{t("whyStaff")}</p>
+              </div>
+
+              <Button asChild variant="ghost" className="mt-4 w-full">
+                <Link href="/portal">
+                  {t("browse")} <ArrowRight />
+                </Link>
+              </Button>
             </div>
           </div>
         </BlurFade>

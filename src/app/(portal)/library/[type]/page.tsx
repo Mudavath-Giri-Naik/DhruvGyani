@@ -1,7 +1,5 @@
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
-import { PageHeader, PageShell } from "@/components/page-header";
-import { TypeBadge } from "@/components/items/badges";
 import { getRepo, isStaff } from "@/lib/auth";
 import { LIBRARY_SEGMENTS } from "@/lib/constants";
 import { LibraryBrowser } from "./library-browser";
@@ -16,18 +14,16 @@ export default async function LibraryPage({ params }: PageProps<"/library/[type]
   const { type: seg } = await params;
   if (!(seg in LIBRARY_SEGMENTS)) notFound();
   const type = LIBRARY_SEGMENTS[seg as keyof typeof LIBRARY_SEGMENTS];
-  const [t, tn, repo] = await Promise.all([getTranslations("library"), getTranslations("nav"), getRepo()]);
+  const repo = await getRepo();
   const staff = isStaff(repo.viewer.role);
-  const [items, expeditions] = await Promise.all([repo.listItems({ type, includeNonPublic: staff }), repo.expeditions()]);
-  const label = tn(seg as "reports");
+  const [items, expeditions, counts] = await Promise.all([repo.listItems({ type, includeNonPublic: staff }), repo.expeditions(), repo.counts()]);
   return (
-    <PageShell>
-      <PageHeader
-        eyebrow={<TypeBadge type={type} />}
-        title={t("title", { type: label })}
-        description={t("subtitle", { type: label.toLowerCase() })}
-      />
-      <LibraryBrowser items={items} expeditions={expeditions.map((e) => ({ id: e.id, code: e.code }))} />
-    </PageShell>
+    <LibraryBrowser
+      segment={seg}
+      type={type}
+      items={items}
+      expeditions={expeditions.map((e) => ({ id: e.id, code: e.code }))}
+      counts={Object.fromEntries(Object.values(LIBRARY_SEGMENTS).map((k) => [k, counts[k]]))}
+    />
   );
 }

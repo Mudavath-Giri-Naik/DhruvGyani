@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { useState } from "react";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, XAxis, YAxis } from "recharts";
-import { Eye, Search, SearchX, ThumbsUp } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { NumberTicker } from "@/components/ui/number-ticker";
+import { ChartArea, ChartNoAxesColumn, ChartPie, Download, Eye, Search, SearchX, ThumbsUp, TrendingUp, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { Frame, FrameBody, FrameHeader, MetaChip, Pane, Stat } from "@/components/frame";
 
 const trafficConfig: ChartConfig = { views: { label: "Item views", color: "var(--chart-1)" }, searches: { label: "Searches", color: "var(--chart-2)" } };
 const statusConfig: ChartConfig = {
@@ -17,6 +18,8 @@ const statusConfig: ChartConfig = {
 };
 const channelConfig: ChartConfig = { approved: { label: "Approved / published", color: "var(--chart-2)" }, total: { label: "All drafts", color: "var(--chart-1)" } };
 const CHANNEL: Record<string, string> = { website_article: "Article", x: "X", facebook: "Facebook", instagram: "Instagram", linkedin: "LinkedIn" };
+// charts fill their pane on desktop and get a fixed height when the page stacks
+const CHART = "aspect-auto h-56 w-full fit:h-auto fit:min-h-0 fit:flex-1";
 
 export function AnalyticsBoard({
   byDay,
@@ -36,43 +39,78 @@ export function AnalyticsBoard({
   topItems: { id: string; title: string; views: number }[];
 }) {
   const t = useTranslations("analytics");
-  const kpis = [
-    { label: t("views"), value: totals.views, icon: Eye, suffix: "" },
-    { label: t("searches"), value: totals.searches, icon: Search, suffix: "" },
-    { label: t("noResult"), value: noResult.reduce((a, n) => a + n.count, 0), icon: SearchX, suffix: "" },
-    { label: t("approvalRate"), value: totals.approvalRate, icon: ThumbsUp, suffix: "%" },
-  ];
+  const [range, setRange] = useState("14");
+  const days = byDay.slice(-Number(range));
   const maxTop = Math.max(1, ...top.map((x) => x.count));
+  const maxViews = Math.max(1, ...topItems.map((x) => x.views));
+  const gapCount = noResult.reduce((a, n) => a + n.count, 0);
+
+  const exportCsv = () => {
+    const csv = ["day,views,searches", ...byDay.map((d) => `${d.day},${d.views},${d.searches}`)].join("\n");
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "dhruvgyani-traffic.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        {kpis.map((k) => (
-          <Card key={k.label}>
-            <CardContent className="flex items-center justify-between p-5">
-              <div>
-                <p className="text-sm text-muted-foreground">{k.label}</p>
-                <p className="mt-1 text-3xl font-semibold tabular-nums">
-                  <NumberTicker value={k.value} />
-                  {k.suffix}
-                </p>
-              </div>
-              <span className="rounded-xl bg-gradient-to-br from-primary/15 to-aurora/15 p-3 text-primary">
-                <k.icon className="size-5" />
-              </span>
-            </CardContent>
-          </Card>
-        ))}
+    <Frame>
+      <FrameHeader
+        icon={ChartNoAxesColumn}
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            {/* on short screens the KPI row folds into these chips so the charts keep their height */}
+            <MetaChip icon={Eye} className="hidden short:inline-flex">
+              {totals.views} views
+            </MetaChip>
+            <MetaChip icon={Search} className="hidden short:inline-flex">
+              {totals.searches} searches
+            </MetaChip>
+            <MetaChip icon={SearchX} className="hidden short:inline-flex">
+              {gapCount} no-result
+            </MetaChip>
+            <MetaChip icon={ThumbsUp} className="hidden short:inline-flex">
+              {totals.approvalRate}% approved
+            </MetaChip>
+            <Button variant="outline" size="sm" onClick={exportCsv}>
+              <Download /> CSV
+            </Button>
+          </>
+        }
+      />
+
+      <div className="grid shrink-0 grid-cols-2 gap-3 short:hidden xl:grid-cols-4 tall:gap-4">
+        <Stat icon={Eye} label={t("views")} value={totals.views} />
+        <Stat icon={Search} label={t("searches")} value={totals.searches} />
+        <Stat icon={SearchX} label={t("noResult")} value={gapCount} />
+        <Stat icon={ThumbsUp} label={t("approvalRate")} value={totals.approvalRate} suffix="%" hint={`${totals.reviewed} reviewed drafts`} />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Traffic, last 14 days</CardTitle>
-          <CardDescription>Item views and searches per day (no personal data is stored).</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={trafficConfig} className="aspect-auto h-72 w-full">
-            <AreaChart data={byDay} margin={{ left: 0, right: 12 }}>
+      <FrameBody className="lg:grid-cols-12 fit:grid-rows-[minmax(0,5fr)_minmax(0,4fr)]">
+        <Pane
+          icon={ChartArea}
+          title="Traffic"
+          description="Item views and searches per day (no personal data is stored)."
+          scroll={false}
+          className="lg:col-span-8"
+          bodyClassName="px-3 pb-3"
+          action={
+            <ToggleGroup type="single" variant="outline" size="sm" value={range} onValueChange={(v) => v && setRange(v)} aria-label="Date range">
+              <ToggleGroupItem value="7" className="px-2.5 text-xs">
+                7d
+              </ToggleGroupItem>
+              <ToggleGroupItem value="14" className="px-2.5 text-xs">
+                14d
+              </ToggleGroupItem>
+            </ToggleGroup>
+          }
+        >
+          <ChartContainer config={trafficConfig} className={CHART}>
+            <AreaChart data={days} margin={{ left: 0, right: 12, top: 4 }}>
               <defs>
                 {(["views", "searches"] as const).map((k) => (
                   <linearGradient key={k} id={`g-${k}`} x1="0" y1="0" x2="0" y2="1">
@@ -90,117 +128,83 @@ export function AnalyticsBoard({
               <ChartLegend content={<ChartLegendContent />} />
             </AreaChart>
           </ChartContainer>
-        </CardContent>
-      </Card>
+        </Pane>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("topSearches")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2.5">
-              {top.map((s) => (
-                <li key={s.query} className="grid grid-cols-[1fr_auto] items-center gap-3 text-sm">
-                  <div>
-                    <div className="flex justify-between">
-                      <span className="truncate font-medium">{s.query}</span>
-                      <span className="text-xs text-muted-foreground">avg {s.avgResults} results</span>
-                    </div>
-                    <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-gradient-to-r from-primary to-aurora" style={{ width: `${(s.count / maxTop) * 100}%` }} />
-                    </div>
-                  </div>
-                  <span className="w-8 text-right tabular-nums">{s.count}</span>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+        <Pane icon={ChartPie} title={t("byStatus")} scroll={false} className="lg:col-span-4" bodyClassName="px-3 pb-3">
+          <ChartContainer config={statusConfig} className={CHART}>
+            <PieChart>
+              <ChartTooltip content={<ChartTooltipContent nameKey="status" hideLabel />} />
+              <Pie data={byStatus} dataKey="count" nameKey="status" innerRadius="55%" strokeWidth={4}>
+                {byStatus.map((s) => (
+                  <Cell key={s.status} fill={`var(--color-${s.status})`} />
+                ))}
+              </Pie>
+              <ChartLegend content={<ChartLegendContent nameKey="status" />} />
+            </PieChart>
+          </ChartContainer>
+        </Pane>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <SearchX className="size-5 text-warning" /> {t("noResult")}
-            </CardTitle>
-            <CardDescription>Each is a signal for new explainers or uploads.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="divide-y">
-              {noResult.map((n) => (
-                <li key={n.query} className="flex items-center justify-between py-2 text-sm">
-                  <span>
+        <Pane icon={TrendingUp} title={t("topSearches")} className="lg:col-span-3">
+          <ul className="space-y-2.5">
+            {top.map((s) => (
+              <li key={s.query} className="text-sm">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="truncate font-medium">{s.query}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                    {s.count}× · avg {s.avgResults}
+                  </span>
+                </div>
+                <div className="mt-1 h-1.5 overflow-hidden rounded-full bg-muted">
+                  <div className="h-full rounded-full bg-gradient-to-r from-primary to-aurora" style={{ width: `${(s.count / maxTop) * 100}%` }} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        </Pane>
+
+        <Pane icon={SearchX} title="Content gaps" description="Signals for new explainers or uploads." className="lg:col-span-3" bodyClassName="px-2">
+          <ul>
+            {noResult.map((n) => (
+              <li key={n.query}>
+                <Link href="/studio/content" className="group flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-muted/60">
+                  <span className="min-w-0 truncate">
                     “{n.query}” <span className="text-muted-foreground">· {n.count}×</span>
                   </span>
-                  <Button asChild size="sm" variant="ghost">
-                    <Link href="/studio/content">Create content</Link>
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </CardContent>
-        </Card>
+                  <span className="shrink-0 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">Create</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </Pane>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>{t("byStatus")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={statusConfig} className="mx-auto aspect-square h-64">
-              <PieChart>
-                <ChartTooltip content={<ChartTooltipContent nameKey="status" hideLabel />} />
-                <Pie data={byStatus} dataKey="count" nameKey="status" innerRadius={60} strokeWidth={4}>
-                  {byStatus.map((s) => (
-                    <Cell key={s.status} fill={`var(--color-${s.status})`} />
-                  ))}
-                </Pie>
-                <ChartLegend content={<ChartLegendContent nameKey="status" />} />
-              </PieChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
+        <Pane icon={ThumbsUp} title="Most-approved formats" scroll={false} className="lg:col-span-3" bodyClassName="px-3 pb-3">
+          <ChartContainer config={channelConfig} className={CHART}>
+            <BarChart data={byChannel.map((c) => ({ ...c, name: CHANNEL[c.channel] }))} margin={{ left: 0, right: 4, top: 4 }}>
+              <CartesianGrid vertical={false} />
+              <XAxis dataKey="name" tickLine={false} axisLine={false} interval={0} tick={{ fontSize: 10 }} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={24} />
+              <ChartTooltip content={<ChartTooltipContent />} />
+              <Bar dataKey="total" fill="var(--color-total)" radius={4} />
+              <Bar dataKey="approved" fill="var(--color-approved)" radius={4} />
+            </BarChart>
+          </ChartContainer>
+        </Pane>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Most-approved formats</CardTitle>
-            <CardDescription>
-              {totals.reviewed} reviewed drafts · {totals.approvalRate}% approved
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ChartContainer config={channelConfig} className="aspect-auto h-64 w-full">
-              <BarChart data={byChannel.map((c) => ({ ...c, name: CHANNEL[c.channel] }))}>
-                <CartesianGrid vertical={false} />
-                <XAxis dataKey="name" tickLine={false} axisLine={false} />
-                <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={28} />
-                <ChartTooltip content={<ChartTooltipContent />} />
-                <Bar dataKey="total" fill="var(--color-total)" radius={4} />
-                <Bar dataKey="approved" fill="var(--color-approved)" radius={4} />
-                <ChartLegend content={<ChartLegendContent />} />
-              </BarChart>
-            </ChartContainer>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>{t("topItems")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ol className="grid gap-2 md:grid-cols-2">
-              {topItems.map((i, n) => (
-                <li key={i.id} className="flex items-center gap-3 rounded-xl border p-3 text-sm">
-                  <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{n + 1}</span>
-                  <Link href={`/items/${i.id}`} className="min-w-0 flex-1 truncate font-medium hover:text-primary">
-                    {i.title}
-                  </Link>
-                  <span className="tabular-nums text-muted-foreground">{i.views}</span>
-                </li>
-              ))}
-            </ol>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+        <Pane icon={Trophy} title={t("topItems")} className="lg:col-span-3" bodyClassName="px-2">
+          <ol>
+            {topItems.map((i, n) => (
+              <li key={i.id}>
+                <Link href={`/items/${i.id}`} className="group relative flex items-center gap-2.5 overflow-hidden rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-muted/60">
+                  <span className="absolute inset-y-1 left-0 rounded-md bg-primary/10" style={{ width: `${(i.views / maxViews) * 100}%` }} aria-hidden />
+                  <span className="relative flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[10px] font-semibold text-primary">{n + 1}</span>
+                  <span className="relative min-w-0 flex-1 truncate font-medium group-hover:text-primary">{i.title}</span>
+                  <span className="relative text-muted-foreground tabular-nums">{i.views}</span>
+                </Link>
+              </li>
+            ))}
+          </ol>
+        </Pane>
+      </FrameBody>
+    </Frame>
   );
 }

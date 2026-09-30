@@ -6,7 +6,7 @@ import { useState, useTransition } from "react";
 import { Bookmark, BookmarkCheck, Check, Copy, Quote } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Pane } from "@/components/frame";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function CopyBlock({ text }: { text: string }) {
@@ -14,7 +14,7 @@ function CopyBlock({ text }: { text: string }) {
   const [done, setDone] = useState(false);
   return (
     <div className="relative">
-      <pre className="max-h-48 overflow-auto rounded-lg bg-muted p-3 pr-10 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">{text}</pre>
+      <pre tabIndex={0} className="max-h-32 overflow-auto rounded-lg bg-muted p-3 pr-10 font-mono text-[11px] leading-relaxed whitespace-pre-wrap">{text}</pre>
       <Button
         size="icon-sm"
         variant="ghost"
@@ -36,14 +36,8 @@ function CopyBlock({ text }: { text: string }) {
 export function CitePanel({ plain, bibtex }: { plain: string; bibtex: string }) {
   const t = useTranslations("item");
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-base">
-          <Quote className="size-4 text-primary" /> {t("cite")}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="plain">
+    <Pane icon={Quote} title={t("cite")} scroll={false} className="shrink-0" bodyClassName="px-4 pb-4">
+      <Tabs defaultValue="plain">
           <TabsList className="w-full">
             <TabsTrigger value="plain">{t("plain")}</TabsTrigger>
             <TabsTrigger value="bibtex">{t("bibtex")}</TabsTrigger>
@@ -55,8 +49,7 @@ export function CitePanel({ plain, bibtex }: { plain: string; bibtex: string }) 
             <CopyBlock text={bibtex} />
           </TabsContent>
         </Tabs>
-      </CardContent>
-    </Card>
+    </Pane>
   );
 }
 

@@ -126,7 +126,7 @@
   },
   "landing": {
     "badge": "Ministry of Earth Sciences · NCPOR",
-    "title1": "India's polar science,",
+    "title1": "India's <hl>polar science,</hl>",
     "title2": "in everyone's language.",
     "subtitle": "One portal for expedition reports, datasets, publications, photos, videos and activities — plus a Content Studio that drafts cited, human-approved stories in English and Hindi.",
     "askPlaceholder": "Ask NCPOR: e.g. “What is sea ice?”",
@@ -157,11 +157,17 @@
     "f6b": "Unreleased results stay private — off public pages, search and AI — until release.",
     "ctaTitle": "Ready to explore the poles?",
     "ctaBody": "Browse expeditions, learn the science, or sign in as staff to create content.",
-    "footerNote": "A prototype for Smart India Hackathon 2026. Sample content is clearly labelled and is not real data."
+    "footerNote": "A prototype for Smart India Hackathon 2026. Sample content is clearly labelled and is not real data.",
+    "new": "New",
+    "heroBadge": "Ask NCPOR answers with cited sources"
   },
   "portal": {
-    "welcome": "Welcome to DhruvGyani",
-    "welcomeBack": "Welcome back, {name}",
+    "welcome": "Welcome to <hl>DhruvGyani</hl>",
+    "welcomeBack": "Welcome back, <hl>{name}</hl>",
+    "eyebrow": "Polar knowledge hub",
+    "featured": "Featured expedition",
+    "quickLinks": "Quick links",
+    "noStories": "No stories published yet.",
     "subtitle": "Explore India's polar research — expeditions, data and stories, all linked.",
     "quickSearch": "Search reports, data, photos…",
     "recent": "Recently added",
@@ -188,7 +194,18 @@
     "noItems": "No released items for this type yet.",
     "shareCopied": "Link copied to clipboard",
     "tbd": "To be announced",
-    "summary": "Summary"
+    "summary": "Summary",
+    "countExpeditions": "{count, plural, one {# expedition} other {# expeditions}}",
+    "countRegions": "{count, plural, one {# region} other {# regions}}",
+    "searchPlaceholder": "Search expeditions by code, title or summary…",
+    "filterRegion": "Filter by region",
+    "anyStatus": "Any status",
+    "noMatch": "No expeditions match these filters.",
+    "preview": "Expedition preview",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "findInArchive": "Find in archive",
+    "newer": "Newer expedition: {code}",
+    "older": "Older expedition: {code}"
   },
   "explore": {
     "title": "Explore the archive",
@@ -209,7 +226,17 @@
     "startTitle": "Start with a search",
     "startBody": "Or pick a popular topic:",
     "clear": "Clear filters",
-    "hybrid": "Hybrid search: keyword + meaning"
+    "hybrid": "Hybrid search: keyword + meaning",
+    "clearSearch": "Clear search",
+    "refine": "Refine",
+    "archiveSize": "{count, plural, one {# released item} other {# released items}} in the archive",
+    "sortBy": "Sort results",
+    "sortRelevance": "Most relevant",
+    "sortNewest": "Newest first",
+    "sortTitle": "Title A–Z",
+    "topics": "Topics in the archive",
+    "recent": "Your recent searches",
+    "clearRecent": "Clear"
   },
   "library": {
     "title": "{type} library",
@@ -224,7 +251,9 @@
     "colTitle": "Title",
     "colExpedition": "Expedition",
     "colDate": "Date",
-    "colLang": "Language"
+    "colLang": "Language",
+    "preview": "Item preview",
+    "openItem": "Open item"
   },
   "item": {
     "metadata": "Details",
@@ -258,7 +287,10 @@
     "favourited": "Saved",
     "signInToSave": "Sign in to save favourites",
     "dataQuickLook": "Data Quick-Look",
-    "views": "{count} views"
+    "views": "{count} views",
+    "fullText": "Full text",
+    "askAbout": "Ask about this",
+    "askPrompt": "What does “{title}” say?"
   },
   "stories": {
     "title": "Stories",
@@ -270,14 +302,33 @@
     "promptVersion": "Prompt version",
     "model": "Model",
     "keyFacts": "Key facts",
-    "empty": "No stories published yet."
+    "empty": "No stories published yet.",
+    "searchPlaceholder": "Search stories…",
+    "allLanguages": "All",
+    "count": "{count, plural, =0 {No stories} one {# story} other {# stories}}",
+    "badgeReviewed": "Reviewed by {name}",
+    "badgeCited": "Source-cited",
+    "minutes": "{count} min read",
+    "sourceCount": "{count, plural, one {# source} other {# sources}}",
+    "read": "Read story",
+    "all": "All stories",
+    "noMatch": "No stories match your search.",
+    "listen": "Listen",
+    "stop": "Stop",
+    "more": "More stories",
+    "backToAll": "All stories"
   },
   "map": {
     "title": "Stations map",
     "subtitle": "India's polar and high-altitude research stations and the content linked to them.",
     "items": "{count} linked items",
     "approx": "Coordinates are approximate.",
-    "attribution": "Map data © OpenStreetMap contributors"
+    "attribution": "Map data © OpenStreetMap contributors",
+    "stationCount": "{count, plural, one {# station} other {# stations}}",
+    "showAll": "Show all stations",
+    "stations": "Research stations",
+    "approxShort": "approx.",
+    "search": "Search archive"
   },
   "learn": {
     "title": "Learn",
@@ -299,7 +350,25 @@
     "tryAgain": "Try again",
     "source": "Source",
     "searchGlossary": "Search terms…",
-    "hindiReview": "Hindi meanings are drafts awaiting expert review."
+    "hindiReview": "Hindi meanings are drafts awaiting expert review.",
+    "noQuizzes": "No quizzes yet — they appear once items have text.",
+    "quizN": "Quiz {n}",
+    "quizCount": "{count, plural, one {# quiz} other {# quizzes}}",
+    "flashcards": "Flashcards",
+    "showTerm": "Show term",
+    "showMeaning": "Show meaning",
+    "prevCard": "Previous card",
+    "nextCard": "Next card",
+    "shuffle": "Shuffle cards",
+    "openTerm": "Open",
+    "askQuestion": "Ask NCPOR",
+    "noTerms": "No terms match your search.",
+    "listenEn": "Listen in English",
+    "listenHi": "Listen in Hindi",
+    "prevTerm": "Previous term",
+    "nextTerm": "Next term",
+    "askTerm": "What is {term}?",
+    "findTerm": "Find in the archive"
   },
   "ask": {
     "title": "Ask NCPOR",
@@ -313,7 +382,17 @@
     "s2": "What is an ice core?",
     "s3": "What did the Southern Ocean cruise measure?",
     "thinking": "Searching the archive…",
-    "disclaimer": "Answers can be incomplete. Always check the cited source."
+    "disclaimer": "Answers can be incomplete. Always check the cited source.",
+    "newChat": "New chat",
+    "conversation": "Conversation",
+    "emptyTitle": "Ask anything about the archive",
+    "emptyBody": "Questions are answered only from published, public items — every answer shows its sources.",
+    "recent": "Your recent questions",
+    "clearRecent": "Clear",
+    "howTitle": "How answers work",
+    "how1": "We search the published archive for passages that match your question.",
+    "how2": "The answer is written only from those passages, each one cited.",
+    "how3": "If the archive has nothing on it, we say so instead of guessing."
   },
   "login": {
     "title": "Sign in to DhruvGyani",
@@ -326,7 +405,8 @@
     "demoBody": "Supabase isn't configured, so Google sign-in is disabled. Pick a demo role to explore every part of the portal.",
     "continueAs": "Continue as {role}",
     "error": "Sign-in failed. Please try again.",
-    "privacy": "We only use your name, email and avatar from Google."
+    "privacy": "We only use your name, email and avatar from Google.",
+    "browse": "Continue without signing in"
   },
   "about": {
     "title": "About DhruvGyani",
@@ -338,7 +418,10 @@
     "p3": "Bilingual and accessible by default.",
     "p4": "Clear beats clever.",
     "p5": "Reusable by other institutes.",
-    "disclaimer": "This is a hackathon prototype and is not an official NCPOR website. Sample content is fictional and clearly labelled."
+    "disclaimer": "This is a hackathon prototype and is not an official NCPOR website. Sample content is fictional and clearly labelled.",
+    "statItems": "Archive items",
+    "statTerms": "Glossary terms",
+    "links": "Related links"
   },
   "accessibility": {
     "title": "Accessibility statement",
@@ -353,11 +436,13 @@
     "f5": "Reduced motion is respected when your system requests it.",
     "limitations": "Known limitations",
     "l1": "Some linked external NCPOR documents (PDFs) may not be fully accessible; we link to them as provided.",
-    "l2": "The map is visual; the same station information is available as a list below it.",
+    "l2": "The map is visual; the same station information is available as a list beside it.",
     "l3": "Hindi translations of some content are drafts awaiting expert review.",
     "contact": "Feedback and contact",
     "contactBody": "If you find a barrier, please tell us through NCPOR's official contact channels and mention the page address.",
-    "reviewed": "Last reviewed: {date}"
+    "reviewed": "Last reviewed: {date}",
+    "tryIt": "Try the display controls",
+    "tryItBody": "Language, theme, contrast and text size."
   },
   "studio": {
     "overview": "Studio overview",

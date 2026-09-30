@@ -12,7 +12,7 @@ export default function PortalError({ error, reset }: { error: Error & { digest?
     console.error(error);
   }, [error]);
   return (
-    <div className="mx-auto flex max-w-lg flex-col items-center gap-4 px-4 py-24 text-center">
+    <div className="mx-auto flex max-w-lg flex-col items-center justify-center gap-4 px-4 py-24 text-center fit:h-full fit:py-6">
       <div className="rounded-full bg-destructive/10 p-4 text-destructive">
         <CloudOff className="size-8" />
       </div>

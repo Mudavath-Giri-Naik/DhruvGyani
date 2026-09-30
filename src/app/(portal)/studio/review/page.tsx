@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { ListChecks } from "lucide-react";
-import { EmptyState, PageHeader, PageShell } from "@/components/page-header";
+import { Frame, FrameHeader } from "@/components/frame";
+import { EmptyState } from "@/components/page-header";
 import { getRepo, isStaff, requireRole } from "@/lib/auth";
 import { ReviewQueue } from "./review-queue";
 
@@ -26,14 +27,13 @@ export default async function ReviewPage({ searchParams }: PageProps<"/studio/re
   const counts: Record<string, number> = {};
   for (const g of all) counts[g.status] = (counts[g.status] ?? 0) + 1;
 
-  return (
-    <PageShell wide>
-      <PageHeader title={t("title")} description={t("subtitle")} />
-      {all.length === 0 ? (
+  if (all.length === 0) {
+    return (
+      <Frame>
+        <FrameHeader icon={ListChecks} title={t("title")} description={t("subtitle")} />
         <EmptyState icon={<ListChecks className="size-5" />} title={t("empty")} />
-      ) : (
-        <ReviewQueue list={list} counts={counts} total={all.length} filter={filter} detail={detail} viewer={{ id: viewer.id, role: viewer.role }} />
-      )}
-    </PageShell>
-  );
+      </Frame>
+    );
+  }
+  return <ReviewQueue list={list} counts={counts} total={all.length} filter={filter} detail={detail} viewer={{ id: viewer.id, role: viewer.role }} />;
 }

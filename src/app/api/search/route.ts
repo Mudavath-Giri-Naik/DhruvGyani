@@ -33,6 +33,16 @@ export async function GET(request: Request) {
   if (log !== "0") await repo.logSearch(q, results.length).catch(() => {});
   return Response.json({
     mode: embedding ? "hybrid" : "keyword",
-    results: results.slice(0, limit).map((r) => ({ id: r.item.id, title: r.item.title, type: r.item.type, snippet: r.snippet, score: r.score })),
+    results: results.slice(0, limit).map((r) => ({
+      id: r.item.id,
+      title: r.item.title,
+      type: r.item.type,
+      snippet: r.snippet,
+      score: r.score,
+      date: r.item.event_date,
+      expedition: r.item.expedition_id,
+      language: r.item.language,
+      sample: r.item.is_sample,
+    })),
   });
 }

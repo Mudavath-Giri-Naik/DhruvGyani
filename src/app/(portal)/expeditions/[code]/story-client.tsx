@@ -1,23 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { motion, useScroll, useSpring } from "motion/react";
 import { Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-
-/** Thin aurora progress bar that tracks scrolling through the story. */
-export function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
-  return (
-    <motion.div
-      aria-hidden
-      style={{ scaleX }}
-      className="fixed top-0 right-0 left-0 z-50 h-1 origin-left bg-gradient-to-r from-primary via-aurora to-primary"
-    />
-  );
-}
 
 export function ShareButton({ title }: { title: string }) {
   const t = useTranslations("common");

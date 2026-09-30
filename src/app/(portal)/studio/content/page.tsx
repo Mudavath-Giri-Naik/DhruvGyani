@@ -1,5 +1,3 @@
-import { getTranslations } from "next-intl/server";
-import { PageHeader, PageShell } from "@/components/page-header";
 import { getRepo, isStaff, requireRole } from "@/lib/auth";
 import { isLlmConfigured } from "@/lib/env";
 import { isPubliclyVisible } from "@/lib/policy";
@@ -10,7 +8,7 @@ export const metadata = { title: "Content Studio" };
 export default async function ContentStudioPage({ searchParams }: PageProps<"/studio/content">) {
   const viewer = await requireRole(isStaff, "/studio/content");
   const sp = await searchParams;
-  const [t, repo] = await Promise.all([getTranslations("studio"), getRepo()]);
+  const repo = await getRepo();
   const [items, expeditions] = await Promise.all([repo.listItems(), repo.expeditions()]);
   const sources = items
     .filter((i) => isPubliclyVisible(i))
@@ -23,10 +21,5 @@ export default async function ContentStudioPage({ searchParams }: PageProps<"/st
   }
   const preselect = typeof sp.items === "string" ? sp.items.split(",").filter((id) => sources.some((s) => s.id === id)) : [];
 
-  return (
-    <PageShell wide>
-      <PageHeader title={t("contentTitle")} description={t("contentSub")} />
-      <ContentStudio sources={sources} initial={initial} preselect={preselect} aiLive={isLlmConfigured()} role={viewer.role} />
-    </PageShell>
-  );
+  return <ContentStudio sources={sources} initial={initial} preselect={preselect} aiLive={isLlmConfigured()} role={viewer.role} />;
 }

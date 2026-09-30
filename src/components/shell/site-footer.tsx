@@ -2,15 +2,17 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { Rss } from "lucide-react";
 import { NCPOR_COPYRIGHT_URL } from "@/lib/constants";
+import { cn } from "@/lib/utils";
 
-export async function SiteFooter() {
+export async function SiteFooter({ className }: { className?: string }) {
   const t = await getTranslations("nav");
   const tc = await getTranslations("common");
   return (
-    <footer className="mt-16 border-t px-4 py-6 text-xs text-muted-foreground md:px-8">
+    <footer className={cn("mt-16 border-t px-4 py-6 text-xs text-muted-foreground md:px-8", className)}>
       <div className="mx-auto flex max-w-7xl flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <p>
-          © {new Date().getFullYear()} {tc("appName")} · {tc("orgFull")} (prototype). {tc("sample")} content is fictional.
+          © {new Date().getFullYear()} {tc("appName")} · <span className="lg:max-2xl:hidden">{tc("orgFull")}</span>
+          <span className="hidden lg:max-2xl:inline">{tc("org")}</span> (prototype). {tc("sample")} content is fictional.
         </p>
         <nav aria-label="Footer" className="flex flex-wrap items-center gap-x-4 gap-y-2">
           <Link href="/about" className="hover:text-foreground">

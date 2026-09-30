@@ -23,7 +23,7 @@ export function QuizCard({ itemId, title, questions, source, signedIn }: { itemI
   };
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border bg-card p-5">
+    <div className="flex flex-col">
       <p className="text-xs text-muted-foreground">
         {t("source")}:{" "}
         <Link href={`/items/${itemId}`} className="text-primary hover:underline">

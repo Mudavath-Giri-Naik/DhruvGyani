@@ -1,7 +1,8 @@
-import { CheckCircle2, CircleDashed, ExternalLink } from "lucide-react";
-import { PageHeader, PageShell } from "@/components/page-header";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle2, CircleDashed, ExternalLink, ListOrdered, PlugZap, ServerCog } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { Progress } from "@/components/ui/progress";
+import { Frame, FrameBody, FrameHeader, MetaChip, Pane } from "@/components/frame";
 import { isLlmConfigured, isSupabaseConfigured, serverEnv } from "@/lib/env";
 
 export const metadata = { title: "Setup status" };
@@ -24,62 +25,68 @@ export default function SetupPage() {
     "Create a Gemini API key in Google AI Studio and set GEMINI_API_KEY.",
     "Set ADMIN_BOOTSTRAP_EMAILS to your Google email and run `npm run seed:admin`, then restart `npm run dev`.",
   ];
+  const done = checks.filter((c) => c.ok).length;
+
   return (
-    <PageShell>
-      <PageHeader
+    <Frame>
+      <FrameHeader
+        icon={ServerCog}
         title="Setup status"
         description="DhruvGyani runs on bundled sample data until these are configured. Full click-by-click steps are in SETUP.md at the project root."
+        actions={
+          <MetaChip icon={PlugZap}>
+            {done} of {checks.length} configured
+          </MetaChip>
+        }
       />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Configuration</CardTitle>
-            <CardDescription>Values are never shown here — only whether each one is set.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-3">
+      <FrameBody className="lg:grid-cols-2">
+        <BlurFade className="min-h-0">
+          <Pane icon={PlugZap} title="Configuration" description="Values are never shown here — only whether each one is set." className="h-full">
+            <Progress value={(done / checks.length) * 100} aria-label={`${done} of ${checks.length} integrations configured`} className="mb-4 h-1.5" />
+            <ul className="grid gap-2">
               {checks.map((c) => (
-                <li key={c.label} className="flex items-start gap-3">
-                  {c.ok ? <CheckCircle2 className="mt-0.5 size-5 text-success" /> : <CircleDashed className="mt-0.5 size-5 text-muted-foreground" />}
-                  <div className="grid gap-0.5">
-                    <span className="flex items-center gap-2 text-sm font-medium">
+                <li key={c.label} className="flex items-start gap-3 rounded-xl border bg-background p-3">
+                  {c.ok ? <CheckCircle2 className="mt-0.5 size-5 shrink-0 text-success" aria-hidden /> : <CircleDashed className="mt-0.5 size-5 shrink-0 text-muted-foreground" aria-hidden />}
+                  <div className="grid min-w-0 gap-0.5">
+                    <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
                       {c.label}
                       <Badge variant={c.ok ? "secondary" : "outline"}>{c.ok ? "configured" : "missing"}</Badge>
                     </span>
-                    <span className="font-mono text-xs text-muted-foreground">{c.hint}</span>
+                    <span className="font-mono text-xs break-words text-muted-foreground">{c.hint}</span>
                   </div>
                 </li>
               ))}
             </ul>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Go live in six steps</CardTitle>
-            <CardDescription>
-              See <code>SETUP.md</code> for exact clicks.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ol className="space-y-3">
+          </Pane>
+        </BlurFade>
+        <BlurFade delay={0.08} className="min-h-0">
+          <Pane
+            icon={ListOrdered}
+            title="Go live in six steps"
+            description="See SETUP.md for exact clicks."
+            className="h-full"
+            action={
+              <a
+                href="https://supabase.com/docs/guides/auth/social-login/auth-google"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap text-primary underline-offset-2 hover:underline"
+              >
+                Google sign-in guide <ExternalLink className="size-3" aria-hidden />
+              </a>
+            }
+          >
+            <ol className="relative grid gap-3 before:absolute before:top-3 before:bottom-3 before:left-3 before:w-px before:bg-border">
               {steps.map((s, i) => (
-                <li key={i} className="flex gap-3 text-sm">
-                  <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{i + 1}</span>
-                  <span className="text-muted-foreground">{s}</span>
+                <li key={i} className="relative flex gap-3 text-sm">
+                  <span className="z-10 flex size-6 shrink-0 items-center justify-center rounded-full border bg-card text-xs font-semibold text-primary">{i + 1}</span>
+                  <span className="pt-0.5 text-muted-foreground">{s}</span>
                 </li>
               ))}
             </ol>
-            <a
-              href="https://supabase.com/docs/guides/auth/social-login/auth-google"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 inline-flex items-center gap-1 text-sm text-primary underline-offset-2 hover:underline"
-            >
-              Supabase Google sign-in guide <ExternalLink className="size-3" />
-            </a>
-          </CardContent>
-        </Card>
-      </div>
-    </PageShell>
+          </Pane>
+        </BlurFade>
+      </FrameBody>
+    </Frame>
   );
 }

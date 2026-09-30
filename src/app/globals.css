@@ -3,6 +3,17 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* Single-frame dashboards: `fit` = desktop viewport big enough to show a page without scrolling, `tall` = room to breathe. */
+@custom-variant fit {
+  @media (min-width: 1024px) and (min-height: 600px) { @slot; }
+}
+@custom-variant tall {
+  @media (min-width: 1024px) and (min-height: 820px) { @slot; }
+}
+/* `short` = fits one frame but has no height to spare (most laptops). */
+@custom-variant short {
+  @media (min-width: 1024px) and (min-height: 600px) and (max-height: 819.98px) { @slot; }
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -230,7 +241,31 @@
   --sidebar-border: oklch(0 0 0);
   --glass: oklch(1 0 0);
 }
-.dark.hc {
+/* Landing page: always "polar night" with an electric-blue spotlight, whatever the portal theme is
+   (its wrapper is `.dark.landing`). High-contrast mode still wins. */
+.landing:not(.hc *) {
+  --background: oklch(0.13 0.008 265);
+  --foreground: oklch(0.98 0 0);
+  --card: oklch(0.155 0.008 265);
+  --card-foreground: oklch(0.98 0 0);
+  --popover: oklch(0.17 0.01 265);
+  --popover-foreground: oklch(0.98 0 0);
+  --primary: oklch(0.55 0.24 262);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.2 0.01 265);
+  --secondary-foreground: oklch(0.98 0 0);
+  --muted: oklch(0.2 0.01 265);
+  --muted-foreground: oklch(0.74 0.02 262);
+  --accent: oklch(0.24 0.04 262);
+  --accent-foreground: oklch(0.98 0 0);
+  --aurora: oklch(0.72 0.16 250);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 16%);
+  --ring: oklch(0.65 0.2 262);
+  --glass: oklch(0.155 0.008 265 / 65%);
+  color-scheme: dark;
+}
+.dark.hc, .hc .dark {
   --background: oklch(0 0 0);
   --foreground: oklch(1 0 0);
   --card: oklch(0 0 0);
@@ -301,6 +336,14 @@ html[data-text-size="xl"] { font-size: 125%; }
       linear-gradient(to bottom, color-mix(in oklch, var(--foreground) 6%, transparent) 1px, transparent 1px);
     background-size: 44px 44px;
   }
+  /* cone of light falling from the top centre (landing hero) */
+  .bg-spotlight {
+    background-image:
+      radial-gradient(ellipse 34% 62% at 50% -6%, color-mix(in oklch, var(--primary) 85%, transparent), transparent 72%),
+      radial-gradient(ellipse 62% 78% at 50% 4%, color-mix(in oklch, var(--primary) 42%, transparent), transparent 74%),
+      radial-gradient(ellipse 100% 60% at 50% 0%, color-mix(in oklch, var(--primary) 16%, transparent), transparent 80%);
+  }
+  .hc .bg-spotlight { background-image: none; }
   .skip-link { position: absolute; left: -9999px; top: 0.5rem; z-index: 100; }
   .skip-link:focus { left: 0.5rem; }
 }

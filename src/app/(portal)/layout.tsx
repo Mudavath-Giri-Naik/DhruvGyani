@@ -68,7 +68,8 @@ export default async function PortalLayout({ children }: LayoutProps<"/">) {
         {tn("skip")}
       </a>
       <AppSidebar viewer={viewer} reviewCount={reviewCount} supabase={isSupabaseConfigured()} />
-      <SidebarInset className="min-w-0">
+      {/* App shell: on desktop the inset is pinned to one viewport, <main> takes the leftover height and pages lay themselves out inside it (see components/frame.tsx). */}
+      <SidebarInset className="min-w-0 fit:h-[calc(100svh-1rem)] fit:overflow-hidden">
         <CrumbProvider>
           <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-2 rounded-t-xl border-b bg-background/75 px-3 backdrop-blur-xl md:px-4">
             <SidebarTrigger className="-ml-1" />
@@ -88,10 +89,10 @@ export default async function PortalLayout({ children }: LayoutProps<"/">) {
               </Link>
             </div>
           )}
-          <main id="main" tabIndex={-1} className="flex-1 outline-none">
+          <main id="main" tabIndex={-1} className="flex-1 outline-none fit:min-h-0 fit:overflow-y-auto">
             {children}
           </main>
-          <SiteFooter />
+          <SiteFooter className="fit:mt-0 fit:py-2" />
         </CrumbProvider>
       </SidebarInset>
     </SidebarProvider>

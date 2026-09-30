@@ -1,14 +1,13 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
-import { ArrowRight, BookA, Download, GraduationCap, Snowflake } from "lucide-react";
+import { ArrowRight, BookA, Download, GraduationCap, Layers, ListChecks, Snowflake } from "lucide-react";
 import { BlurFade } from "@/components/ui/blur-fade";
 import { Button } from "@/components/ui/button";
-import { MagicCard } from "@/components/ui/magic-card";
-import { PageHeader, PageShell } from "@/components/page-header";
+import { Frame, FrameBody, FrameHeader, MetaChip, Pane } from "@/components/frame";
 import { PolarArt } from "@/components/polar-art";
 import { getRepo, getViewer } from "@/lib/auth";
 import { buildQuiz } from "@/lib/quiz";
-import { QuizCard } from "./quiz-card";
+import { Flashcards, QuizDeck } from "./learn-client";
 
 export const metadata = { title: "Learn" };
 
@@ -25,92 +24,105 @@ export default async function LearnPage() {
     if (questions.length >= 2) quizzes.push({ itemId: item.id, title: item.title, questions, source: explainer ? "school explainer" : "source text" });
     if (quizzes.length >= 3) break;
   }
-  const featuredTerms = ["cryosphere", "ice shelf", "polynya", "katabatic wind", "permafrost", "krill"].map((term) => glossary.find((g) => g.term === term)).filter(Boolean);
+  // featured terms first, then the rest A–Z
+  const featured = ["cryosphere", "ice shelf", "polynya", "katabatic wind", "permafrost", "krill"];
+  const deck = [...glossary].sort((a, b) => {
+    const fa = featured.indexOf(a.term);
+    const fb = featured.indexOf(b.term);
+    return (fa < 0 ? 99 : fa) - (fb < 0 ? 99 : fb) || a.term.localeCompare(b.term);
+  });
 
   return (
-    <PageShell>
-      <PageHeader title={t("title")} description={t("subtitle")} />
-
-      <BlurFade>
-        <section className="relative overflow-hidden rounded-3xl border">
-          <div className="absolute inset-0">
-            <PolarArt variant="glacier" />
-          </div>
-          <div className="absolute inset-0 bg-gradient-to-r from-background via-background/90 to-background/30" />
-          <div className="relative max-w-2xl space-y-4 p-6 md:p-10">
-            <p className="inline-flex items-center gap-2 text-sm font-medium text-primary">
-              <Snowflake className="size-4" /> {tu("primer")}
-            </p>
-            <h2 className="text-2xl font-semibold tracking-tight md:text-3xl">{t("primerTitle")}</h2>
-            <p className="leading-relaxed">{t("primer1")}</p>
-            <p className="leading-relaxed text-muted-foreground">{t("primer2")}</p>
-            <p className="leading-relaxed text-muted-foreground">{t("primer3")}</p>
-            <Button asChild>
-              <Link href="/explore">
-                {tu("exploreArchive")} <ArrowRight />
-              </Link>
-            </Button>
-          </div>
-        </section>
-      </BlurFade>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <BlurFade inView className="md:col-span-2">
-          <MagicCard className="h-full rounded-2xl" gradientColor="rgba(45,212,167,0.12)" gradientFrom="#3BA7E0" gradientTo="#2DD4A7">
-            <div className="space-y-4 p-6">
-              <div className="flex items-center justify-between">
-                <h2 className="flex items-center gap-2 text-lg font-semibold">
-                  <BookA className="size-5 text-primary" /> {t("glossary")}
-                </h2>
-                <Button asChild variant="ghost" size="sm">
-                  <Link href="/learn/glossary">
-                    {tu("allTerms", { count: glossary.length })} <ArrowRight />
-                  </Link>
-                </Button>
+    <Frame>
+      <FrameHeader
+        icon={GraduationCap}
+        title={t("title")}
+        description={t("subtitle")}
+        actions={
+          <>
+            <MetaChip icon={BookA}>{tu("allTerms", { count: glossary.length })}</MetaChip>
+            <MetaChip icon={ListChecks} className="max-sm:hidden">
+              {t("quizCount", { count: quizzes.length })}
+            </MetaChip>
+          </>
+        }
+      />
+      <FrameBody className="lg:grid-cols-12">
+        {/* primer */}
+        <BlurFade className="min-h-0 lg:col-span-4">
+          <section aria-labelledby="primer-h" className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border bg-card shadow-xs">
+            <div className="relative min-h-28 flex-1 overflow-hidden">
+              <div className="absolute inset-0">
+                <PolarArt variant="glacier" />
               </div>
-              <p className="text-sm text-muted-foreground">{t("glossaryBody")}</p>
-              <dl className="grid gap-3 sm:grid-cols-2">
-                {featuredTerms.map((g) => (
-                  <div key={g!.id} className="rounded-xl border bg-background/60 p-3">
-                    <dt className="font-medium">
-                      {g!.term} <span className="text-sm font-normal text-muted-foreground" lang="hi">· {g!.term_hi}</span>
-                    </dt>
-                    <dd className="mt-1 text-sm text-muted-foreground">{g!.meaning_en}</dd>
-                  </div>
-                ))}
-              </dl>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+              <div className="absolute inset-x-4 bottom-3 text-white">
+                <p className="inline-flex items-center gap-1.5 text-[11px] font-medium tracking-wider text-white/80 uppercase">
+                  <Snowflake className="size-3.5" aria-hidden /> {tu("primer")}
+                </p>
+                <h2 id="primer-h" className="text-xl font-semibold tracking-tight tall:text-2xl">
+                  {t("primerTitle")}
+                </h2>
+              </div>
             </div>
-          </MagicCard>
+            <div className="min-h-0 shrink space-y-2.5 overflow-y-auto p-4 text-sm leading-relaxed">
+              <p>{t("primer1")}</p>
+              <p className="text-muted-foreground">{t("primer2")}</p>
+              <p className="text-muted-foreground">{t("primer3")}</p>
+            </div>
+            <div className="flex shrink-0 gap-2 border-t p-3">
+              <Button asChild className="flex-1">
+                <Link href="/explore">
+                  {tu("exploreArchive")} <ArrowRight />
+                </Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link href="/ask">{t("askQuestion")}</Link>
+              </Button>
+            </div>
+          </section>
         </BlurFade>
-        <BlurFade inView delay={0.1}>
-          <div className="flex h-full flex-col gap-3 rounded-2xl border bg-gradient-to-br from-primary/10 to-aurora/10 p-6">
-            <GraduationCap className="size-8 text-primary" />
-            <h2 className="text-lg font-semibold">{t("teacherPack")}</h2>
-            <p className="text-sm text-muted-foreground">{t("teacherPackBody")}</p>
-            <Button asChild className="mt-auto">
+
+        {/* quizzes */}
+        <BlurFade delay={0.08} className="min-h-0 lg:col-span-5">
+          <Pane icon={ListChecks} title={t("quizzes")} description={t("quizBody")} scroll={false} className="h-full">
+            <QuizDeck quizzes={quizzes} signedIn={viewer.role !== "visitor"} />
+          </Pane>
+        </BlurFade>
+
+        {/* flashcards + teacher pack */}
+        <BlurFade delay={0.16} className="flex min-h-0 flex-col gap-3 lg:col-span-3 tall:gap-4">
+          <Pane
+            icon={Layers}
+            title={t("flashcards")}
+            scroll={false}
+            className="flex-1"
+            action={
+              <Link href="/learn/glossary" className="inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap text-muted-foreground transition-colors hover:text-foreground">
+                {t("glossary")} <ArrowRight className="size-3" aria-hidden />
+              </Link>
+            }
+          >
+            <Flashcards terms={deck} />
+          </Pane>
+          <section aria-labelledby="pack-h" className="flex shrink-0 items-center gap-3 rounded-2xl border bg-gradient-to-br from-primary/10 to-aurora/10 p-3 shadow-xs tall:p-4">
+            <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <GraduationCap className="size-5" aria-hidden />
+            </span>
+            <div className="min-w-0 flex-1">
+              <h2 id="pack-h" className="truncate text-sm font-semibold">
+                {t("teacherPack")}
+              </h2>
+              <p className="line-clamp-2 text-xs text-muted-foreground">{t("teacherPackBody")}</p>
+            </div>
+            <Button asChild size="icon" aria-label={t("downloadPack")} title={t("downloadPack")}>
               <a href="/api/teacher-pack" download>
-                <Download /> {t("downloadPack")}
+                <Download />
               </a>
             </Button>
-          </div>
+          </section>
         </BlurFade>
-      </div>
-
-      <section aria-labelledby="quiz-h" className="space-y-4">
-        <div>
-          <h2 id="quiz-h" className="text-xl font-semibold">
-            {t("quizzes")}
-          </h2>
-          <p className="text-sm text-muted-foreground">{t("quizBody")}</p>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          {quizzes.map((q, i) => (
-            <BlurFade key={q.itemId} inView delay={0.05 * i}>
-              <QuizCard {...q} signedIn={viewer.role !== "visitor"} />
-            </BlurFade>
-          ))}
-        </div>
-      </section>
-    </PageShell>
+      </FrameBody>
+    </Frame>
   );
 }
